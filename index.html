@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Agenda de Tatuagem</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #121212; color: #fff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #333; text-align: left; }
+        th { background-color: #222; }
+        .pendente { color: #ff9999; }
+        .confirmado { color: #99ff99; }
+    </style>
+</head>
+<body>
+    <h1>Agenda DARK013TATTOO</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Estilo</th>
+                <th>Status</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody id="agenda-body">
+            </tbody>
+    </table>
+
+    <script>
+        // Aqui você pode carregar o seu agenda.json
+        const agenda = [
+            { "data": "2026-04-15", "cliente": "Exemplo", "detalhes": {"tema": "Realismo"}, "status": "confirmado", "financeiro": {"valor_total": 800} },
+            { "data": "2026-04-16", "cliente": "Outro", "detalhes": {"tema": "Lettering"}, "status": "pendente", "financeiro": {"valor_total": 500} }
+        ];
+
+        const tbody = document.getElementById('agenda-body');
+        agenda.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.data}</td>
+                <td>${item.cliente}</td>
+                <td>${item.detalhes.tema}</td>
+                <td class="${item.status}">${item.status}</td>
+                <td>R$ ${item.financeiro.valor_total}</td>
+            </tr>`;
+        });
+    </script>
+</body>
+</html>
