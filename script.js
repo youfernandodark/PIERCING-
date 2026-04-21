@@ -66,6 +66,26 @@
     container.innerHTML = html;
   }
 
+  /* ---------- SKELETON LOADER ---------- */
+  function renderSkeletons(count = 6) {
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      html += `
+        <div class="skeleton-card">
+          <div class="skeleton-image"></div>
+          <div class="skeleton-content">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-badge"></div>
+          </div>
+        </div>
+      `;
+    }
+    container.innerHTML = html;
+  }
+
   /* ---------- SUPABASE CLIENT ---------- */
   let supabase = null;
   
@@ -103,7 +123,8 @@
 
   /* ---------- CARREGAMENTO DO CATÁLOGO ---------- */
   async function loadCatalog() {
-    container.innerHTML = '<div class="loading">Carregando catálogo...</div>';
+    // Exibe skeletons imediatamente
+    renderSkeletons(6);
     
     if (!isSupabaseConfigured || !supabase) {
       container.innerHTML = '<div class="error-msg">Erro: conexão com o banco de dados não configurada.</div>';
