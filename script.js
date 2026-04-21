@@ -1,15 +1,15 @@
 (function() {
   "use strict";
 
-  /* ---------- CONFIGURA«√O SUPABASE ----------
+  /* ---------- CONFIGURA√á√ÉO SUPABASE ----------
      Substitua pelos dados do seu projeto para ativar o modo online */
-  const SUPABASE_URL = "https://https://hruldvebruatjcwaoozd.supabase.co";
+  const SUPABASE_URL = "https://hruldvebruatjcwaoozd.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhydWxkdmVicnVhdGpjd2Fvb3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NjI2ODQsImV4cCI6MjA5MjMzODY4NH0.bWxI30NlY53ZBgGChW6xrdRtygiAt9Zt2oHZAD49ZQU";
   
   const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && 
                                SUPABASE_URL.startsWith("https://");
 
-  /* ---------- DADOS EST¡TICOS (cat·logo local) ---------- */
+  /* ---------- DADOS EST√ÅTICOS (cat√°logo local) ---------- */
   const staticProducts = [
     {
       id: 1,
@@ -20,8 +20,8 @@
       adornment_size: "2mm, 2.5mm, 3mm",
       ball_size: null,
       closure_type: "Rosca interna",
-      material: "Tit‚nio ASTM F-136",
-      stone: "ZircÙnia c˙bica",
+      material: "Tit√¢nio ASTM F-136",
+      stone: "Zirc√¥nia c√∫bica",
       image_url: "https://cdn.dooca.store/149217/products/i4gv7ag18wggnxes422rvew637xopnjitkjh_640x640+fill_ffffff.jpg?v=1723906236&webp=0"
     },
     {
@@ -33,7 +33,7 @@
       adornment_size: null,
       ball_size: "3mm",
       closure_type: "Rosca interna",
-      material: "Tit‚nio ASTM F-136",
+      material: "Tit√¢nio ASTM F-136",
       stone: null,
       image_url: "https://cdn.dooca.store/149217/products/b31yhpotj21xrbpwxq0s16gnervsbmacjxhq_640x640+fill_ffffff.jpg?v=1714411709&webp=0"
     },
@@ -46,7 +46,7 @@
       adornment_size: null,
       ball_size: "3mm",
       closure_type: "Rosca interna",
-      material: "Tit‚nio ASTM F-136",
+      material: "Tit√¢nio ASTM F-136",
       stone: null,
       image_url: "https://cdn.dooca.store/149217/products/d0opmepxmrko8qeu06nc2gqmy1gfzhivncjj_640x640+fill_ffffff.jpg?v=1715008547&webp=0"
     },
@@ -59,7 +59,7 @@
       adornment_size: null,
       ball_size: null,
       closure_type: "Clicker",
-      material: "Tit‚nio ASTM F-136",
+      material: "Tit√¢nio ASTM F-136",
       stone: null,
       image_url: "https://cdn.dooca.store/149217/products/6w3ufphp0pdx5vn7ybfq929ynj2355auyf3t_640x640+fill_ffffff.jpg?v=1715006528&webp=0"
     },
@@ -72,8 +72,8 @@
       adornment_size: null,
       ball_size: null,
       closure_type: "Rosca interna",
-      material: "Tit‚nio ASTM F-136",
-      stone: "ZircÙnia c˙bica",
+      material: "Tit√¢nio ASTM F-136",
+      stone: "Zirc√¥nia c√∫bica",
       image_url: "https://cdn.dooca.store/149217/products/g3obdnce2820ixfm7ukowxcdzl3gjyx8aa1r_640x640+fill_ffffff.jpg?v=1715011644&webp=0"
     },
     {
@@ -82,16 +82,16 @@
       name: "Navel Piercing",
       thickness: "1.6mm",
       post_length_options: "10mm",
-      adornment_size: "8,0mm * 5,0mm (MÈdio)",
+      adornment_size: "8,0mm * 5,0mm (M√©dio)",
       ball_size: null,
       closure_type: "Rosca interna",
-      material: "Tit‚nio ASTM F-136",
-      stone: "ZircÙnia c˙bica",
+      material: "Tit√¢nio ASTM F-136",
+      stone: "Zirc√¥nia c√∫bica",
       image_url: "https://cdn.dooca.store/149217/products/tys0wmoqwwgff0hp5hpz6nctn3ycljmcjaaa_640x640+fill_ffffff.jpg?v=1714413218&webp=0"
     }
   ];
 
-  /* ---------- RENDERIZA«√O ---------- */
+  /* ---------- RENDERIZA√á√ÉO ---------- */
   const container = document.getElementById('productContainer');
   
   function renderProducts(products) {
@@ -102,17 +102,17 @@
     
     let html = '';
     products.forEach(prod => {
-      const thickness = prod.thickness || 'ó';
-      const postLength = prod.post_length_options || 'ó';
+      const thickness = prod.thickness || '‚Äî';
+      const postLength = prod.post_length_options || '‚Äî';
       
       let adornmentDisplay = '';
       if (prod.adornment_size) adornmentDisplay = prod.adornment_size;
       else if (prod.ball_size) adornmentDisplay = `Esfera ${prod.ball_size}`;
-      else adornmentDisplay = 'ó';
+      else adornmentDisplay = '‚Äî';
       
-      const closure = prod.closure_type || 'ó';
+      const closure = prod.closure_type || '‚Äî';
       const stoneHtml = prod.stone ? 
-        `<div class="stone-indicator"> ${prod.stone}</div>` : '';
+        `<div class="stone-indicator">üíé ${prod.stone}</div>` : '';
       
       html += `
         <div class="product-card">
@@ -126,7 +126,7 @@
             <div class="specs">
               <div class="spec-item"><span class="spec-label">Espessura</span> <span class="spec-value">${thickness}</span></div>
               <div class="spec-item"><span class="spec-label">Haste</span> <span class="spec-value">${postLength}</span></div>
-              <div class="spec-item"><span class="spec-label">AdereÁo/Esfera</span> <span class="spec-value">${adornmentDisplay}</span></div>
+              <div class="spec-item"><span class="spec-label">Adere√ßo/Esfera</span> <span class="spec-value">${adornmentDisplay}</span></div>
               <div class="spec-item"><span class="spec-label">Trava</span> <span class="spec-value">${closure}</span></div>
             </div>
             ${stoneHtml}
@@ -140,25 +140,18 @@
 
   /* ---------- SUPABASE CLIENT ---------- */
   let supabase = null;
-  const statusEl = document.getElementById('supabaseStatus');
-  const panelEl = document.getElementById('supabasePanel');
   
   if (isSupabaseConfigured) {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      if (panelEl) {
-        panelEl.style.display = 'flex';
-        statusEl.innerText = ' Pronto para conectar';
-      }
+      console.log('‚úÖ Supabase inicializado silenciosamente');
     } catch (e) {
-      console.warn("Supabase n„o inicializado:", e);
+      console.warn("Supabase n√£o inicializado:", e);
     }
-  } else {
-    if (panelEl) panelEl.style.display = 'none';
   }
 
   async function fetchFromSupabase() {
-    if (!supabase) throw new Error("Supabase n„o configurado.");
+    if (!supabase) throw new Error("Supabase n√£o configurado.");
     const { data, error } = await supabase
       .from('products')
       .select('*')
@@ -169,53 +162,40 @@
 
   /* ---------- REGISTRO DE VISITAS (page_views) ---------- */
   async function registerPageView() {
-    if (!supabase) return; // sÛ registra se Supabase estiver ativo
+    if (!supabase) return;
     try {
       await supabase.from('page_views').insert([{ 
         page: 'catalogo',
-        // user_agent e ip_address podem ser preenchidos automaticamente se a tabela aceitar
       }]);
-      console.log(' Visita registrada no Supabase');
+      console.log('üìä Visita registrada no Supabase');
     } catch (err) {
-      console.warn(' Erro ao registrar visita:', err.message);
+      console.warn('‚ö†Ô∏è Erro ao registrar visita:', err.message);
     }
   }
 
-  /* ---------- CARREGAMENTO DO CAT¡LOGO ---------- */
-  async function loadCatalog(forceSupabase = false) {
-    container.innerHTML = '<div class="loading">Carregando cat·logo...</div>';
+  /* ---------- CARREGAMENTO DO CAT√ÅLOGO ---------- */
+  async function loadCatalog() {
+    container.innerHTML = '<div class="loading">Carregando cat√°logo...</div>';
     
-    if (forceSupabase && supabase) {
+    if (isSupabaseConfigured && supabase) {
       try {
         const data = await fetchFromSupabase();
         renderProducts(data);
-        statusEl.innerText = ' Dados do Supabase';
+        console.log('üì¶ Cat√°logo carregado do Supabase');
       } catch (err) {
-        console.error(err);
-        container.innerHTML = '<div class="error-msg">Erro ao carregar do Supabase. Usando cat·logo local.</div>';
+        console.error('Erro ao carregar do Supabase, usando cat√°logo local:', err);
         renderProducts(staticProducts);
-        statusEl.innerText = ' Fallback local';
       }
     } else {
       renderProducts(staticProducts);
-      if (supabase) {
-        statusEl.innerText = ' Cat·logo local (est·tico)';
-      }
+      console.log('üì¶ Cat√°logo local carregado');
     }
   }
 
-  /* ---------- INICIALIZA«√O ---------- */
+  /* ---------- INICIALIZA√á√ÉO ---------- */
   document.addEventListener('DOMContentLoaded', () => {
-    // Registra a visita (se Supabase configurado)
     registerPageView();
-
-    // Define se carrega inicialmente do Supabase ou do est·tico
-    const useSupabaseInitially = isSupabaseConfigured;
-    loadCatalog(useSupabaseInitially);
-    
-    // Event listeners dos botıes do painel
-    document.getElementById('useSupabaseBtn')?.addEventListener('click', () => loadCatalog(true));
-    document.getElementById('useStaticBtn')?.addEventListener('click', () => loadCatalog(false));
+    loadCatalog();
   });
 
 })();
