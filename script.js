@@ -3,8 +3,8 @@
 
   /* ---------- CONFIGURAÇÃO SUPABASE ----------
      Substitua pelos dados do seu projeto para ativar o modo online */
-  const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
-  const SUPABASE_ANON_KEY = "SUA_ANON_KEY";
+  const SUPABASE_URL = "https://https://hruldvebruatjcwaoozd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhydWxkdmVicnVhdGpjd2Fvb3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NjI2ODQsImV4cCI6MjA5MjMzODY4NH0.bWxI30NlY53ZBgGChW6xrdRtygiAt9Zt2oHZAD49ZQU";
   
   const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && 
                                SUPABASE_URL.startsWith("https://");
@@ -167,6 +167,21 @@
     return data;
   }
 
+  /* ---------- REGISTRO DE VISITAS (page_views) ---------- */
+  async function registerPageView() {
+    if (!supabase) return; // só registra se Supabase estiver ativo
+    try {
+      await supabase.from('page_views').insert([{ 
+        page: 'catalogo',
+        // user_agent e ip_address podem ser preenchidos automaticamente se a tabela aceitar
+      }]);
+      console.log(' Visita registrada no Supabase');
+    } catch (err) {
+      console.warn(' Erro ao registrar visita:', err.message);
+    }
+  }
+
+  /* ---------- CARREGAMENTO DO CATÁLOGO ---------- */
   async function loadCatalog(forceSupabase = false) {
     container.innerHTML = '<div class="loading">Carregando catálogo...</div>';
     
@@ -174,7 +189,7 @@
       try {
         const data = await fetchFromSupabase();
         renderProducts(data);
-        statusEl.innerText = ' Dados do Supabase';
+        statusEl.innerText = ' Dados do Supabase';
       } catch (err) {
         console.error(err);
         container.innerHTML = '<div class="error-msg">Erro ao carregar do Supabase. Usando catálogo local.</div>';
@@ -191,9 +206,14 @@
 
   /* ---------- INICIALIZAÇÃO ---------- */
   document.addEventListener('DOMContentLoaded', () => {
+    // Registra a visita (se Supabase configurado)
+    registerPageView();
+
+    // Define se carrega inicialmente do Supabase ou do estático
     const useSupabaseInitially = isSupabaseConfigured;
     loadCatalog(useSupabaseInitially);
     
+    // Event listeners dos botões do painel
     document.getElementById('useSupabaseBtn')?.addEventListener('click', () => loadCatalog(true));
     document.getElementById('useStaticBtn')?.addEventListener('click', () => loadCatalog(false));
   });
