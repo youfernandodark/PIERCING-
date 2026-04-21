@@ -1,8 +1,7 @@
 (function() {
   "use strict";
 
-  /* ---------- CONFIGURAÇÃO SUPABASE ----------
-     Substitua pelos dados do seu projeto para ativar o modo online */
+  /* ---------- CONFIGURAÇÃO SUPABASE ---------- */
   const SUPABASE_URL = "https://hruldvebruatjcwaoozd.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhydWxkdmVicnVhdGpjd2Fvb3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NjI2ODQsImV4cCI6MjA5MjMzODY4NH0.bWxI30NlY53ZBgGChW6xrdRtygiAt9Zt2oHZAD49ZQU";
   
@@ -22,7 +21,9 @@
       closure_type: "Rosca interna",
       material: "Titânio ASTM F-136",
       stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/i4gv7ag18wggnxes422rvew637xopnjitkjh_640x640+fill_ffffff.jpg?v=1723906236&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/i4gv7ag18wggnxes422rvew637xopnjitkjh_640x640+fill_ffffff.jpg?v=1723906236&webp=0",
+      stock_quantity: 5,
+      is_available: true
     },
     {
       id: 2,
@@ -35,7 +36,9 @@
       closure_type: "Rosca interna",
       material: "Titânio ASTM F-136",
       stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/b31yhpotj21xrbpwxq0s16gnervsbmacjxhq_640x640+fill_ffffff.jpg?v=1714411709&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/b31yhpotj21xrbpwxq0s16gnervsbmacjxhq_640x640+fill_ffffff.jpg?v=1714411709&webp=0",
+      stock_quantity: 2,
+      is_available: true
     },
     {
       id: 3,
@@ -48,7 +51,9 @@
       closure_type: "Rosca interna",
       material: "Titânio ASTM F-136",
       stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/d0opmepxmrko8qeu06nc2gqmy1gfzhivncjj_640x640+fill_ffffff.jpg?v=1715008547&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/d0opmepxmrko8qeu06nc2gqmy1gfzhivncjj_640x640+fill_ffffff.jpg?v=1715008547&webp=0",
+      stock_quantity: 0,
+      is_available: false
     },
     {
       id: 4,
@@ -61,7 +66,9 @@
       closure_type: "Clicker",
       material: "Titânio ASTM F-136",
       stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/6w3ufphp0pdx5vn7ybfq929ynj2355auyf3t_640x640+fill_ffffff.jpg?v=1715006528&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/6w3ufphp0pdx5vn7ybfq929ynj2355auyf3t_640x640+fill_ffffff.jpg?v=1715006528&webp=0",
+      stock_quantity: 8,
+      is_available: true
     },
     {
       id: 5,
@@ -74,7 +81,9 @@
       closure_type: "Rosca interna",
       material: "Titânio ASTM F-136",
       stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/g3obdnce2820ixfm7ukowxcdzl3gjyx8aa1r_640x640+fill_ffffff.jpg?v=1715011644&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/g3obdnce2820ixfm7ukowxcdzl3gjyx8aa1r_640x640+fill_ffffff.jpg?v=1715011644&webp=0",
+      stock_quantity: 1,
+      is_available: true
     },
     {
       id: 6,
@@ -87,7 +96,9 @@
       closure_type: "Rosca interna",
       material: "Titânio ASTM F-136",
       stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/tys0wmoqwwgff0hp5hpz6nctn3ycljmcjaaa_640x640+fill_ffffff.jpg?v=1714413218&webp=0"
+      image_url: "https://cdn.dooca.store/149217/products/tys0wmoqwwgff0hp5hpz6nctn3ycljmcjaaa_640x640+fill_ffffff.jpg?v=1714413218&webp=0",
+      stock_quantity: 3,
+      is_available: true
     }
   ];
 
@@ -113,6 +124,13 @@
       const closure = prod.closure_type || '—';
       const stoneHtml = prod.stone ? 
         `<div class="stone-indicator">💎 ${prod.stone}</div>` : '';
+
+      // Controle de disponibilidade
+      const stockQty = prod.stock_quantity ?? 0;
+      const isAvailable = prod.is_available !== undefined ? prod.is_available : (stockQty > 0);
+      const availabilityText = isAvailable ? 'Disponível' : 'Indisponível';
+      const availabilityClass = isAvailable ? 'available' : 'unavailable';
+      const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
       
       html += `
         <div class="product-card">
@@ -131,6 +149,10 @@
             </div>
             ${stoneHtml}
             <div class="material-badge">${prod.material}</div>
+            <div class="stock-info">
+              <span class="availability-badge ${availabilityClass}">${availabilityText}</span>
+              <span class="stock-quantity">${stockDisplay}</span>
+            </div>
           </div>
         </div>
       `;
@@ -144,7 +166,7 @@
   if (isSupabaseConfigured) {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('✅ Supabase inicializado silenciosamente');
+      console.log('✅ Supabase inicializado');
     } catch (e) {
       console.warn("Supabase não inicializado:", e);
     }
