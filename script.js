@@ -148,6 +148,50 @@
     return data;
   }
 
+  /* ---------- SEED AUTOMÁTICO: Insere TN10 se tabela estiver vazia ---------- */
+  async function seedInitialProductIfNeeded() {
+    if (!supabase) return;
+    
+    try {
+      // Verifica quantos produtos existem
+      const { count, error: countError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      // Se já houver produtos, não faz nada
+      if (count > 0) return;
+      
+      console.log('📦 Tabela vazia. Inserindo produto inicial TN10...');
+      
+      const initialProduct = {
+        code: 'TN10',
+        name: 'Ferradura',
+        thickness: '1.2mm',
+        post_length_options: '6mm, 8mm, 10mm, 12mm',
+        ball_size: '3mm',
+        closure_type: 'Rosca interna',
+        material: 'Titânio ASTM F-136',
+        image_url: 'https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg?v=1714414393&webp=0',
+        stock_quantity: 10,
+        is_available: true,
+        stone: null
+      };
+      
+      const { error: insertError } = await supabase
+        .from('products')
+        .insert([initialProduct]);
+      
+      if (insertError) throw insertError;
+      
+      console.log('✅ Produto TN10 inserido com sucesso!');
+    } catch (err) {
+      console.warn('⚠️ Não foi possível executar o seed automático:', err.message);
+      // Não interrompe a execução – o catálogo pode estar vazio ou já ter dados
+    }
+  }
+
   /* ---------- LIKES: BUSCAR / ATUALIZAR ---------- */
   async function fetchLikesForProducts(productIds) {
     if (!supabase || !productIds.length) return {};
@@ -275,10 +319,13 @@
     }
 
     try {
+      // Garante que ao menos o produto TN10 exista (seed)
+      await seedInitialProductIfNeeded();
+      
       // Carrega produtos e likes em paralelo
-      const [products, likesMap] = await Promise.all([
+      const [products, _] = await Promise.all([
         fetchFromSupabase(),
-        fetchLikesForProducts([]) // será chamado novamente depois, mas podemos já ter os IDs
+        fetchLikesForProducts([]) // será refinado abaixo
       ]);
       
       // Agora busca likes específicos para os IDs dos produtos
