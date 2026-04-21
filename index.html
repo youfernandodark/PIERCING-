@@ -9,7 +9,7 @@
   <!-- Fonte Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,12 +18,29 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Barra de anúncio deslizante (marquee) -->
+  <div class="top-marquee">
+    <div class="marquee-content">
+      <span> Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada </span>
+      <span> Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada </span>
+    </div>
+  </div>
+
   <div class="container">
     <header class="studio-header">
-      <div class="studio-name">
-        DARK013TATTOO <span class="skulls"></span>
+      <div class="header-left">
+        <div class="studio-name">
+          <span class="header-icon"></span>
+          DARK013TATTOO
+          <span class="header-icon"></span>
+        </div>
+        <div class="badge"> Joias em Titânio </div>
       </div>
-      <div class="badge"> Joias em Titânio </div>
+      <div class="header-right">
+        <span class="material-grade">ASTM F-136</span>
+        <span class="model-count" id="modelCountDisplay">—</span>
+        <span class="header-tagline">Grau Cirúrgico · BioCompatível</span>
+      </div>
     </header>
 
     <div class="catalog-title">

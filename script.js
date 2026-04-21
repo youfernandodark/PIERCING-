@@ -9,12 +9,19 @@
                                SUPABASE_URL.startsWith("https://");
 
   const container = document.getElementById('productContainer');
+  const modelCountDisplay = document.getElementById('modelCountDisplay');
   
   /* ---------- RENDERIZAÇÃO ---------- */
   function renderProducts(products) {
     if (!products || products.length === 0) {
       container.innerHTML = '<div class="error-msg">Nenhum produto encontrado no catálogo.</div>';
+      if (modelCountDisplay) modelCountDisplay.textContent = '0 modelos';
       return;
+    }
+    
+    // Atualiza contador no cabeçalho
+    if (modelCountDisplay) {
+      modelCountDisplay.textContent = `${products.length} modelo${products.length > 1 ? 's' : ''}`;
     }
     
     let html = '';
@@ -68,6 +75,7 @@
 
   /* ---------- SKELETON LOADER ---------- */
   function renderSkeletons(count = 6) {
+    if (modelCountDisplay) modelCountDisplay.textContent = '...';
     let html = '';
     for (let i = 0; i < count; i++) {
       html += `
@@ -128,6 +136,7 @@
     
     if (!isSupabaseConfigured || !supabase) {
       container.innerHTML = '<div class="error-msg">Erro: conexão com o banco de dados não configurada.</div>';
+      if (modelCountDisplay) modelCountDisplay.textContent = 'Erro';
       return;
     }
 
@@ -138,6 +147,7 @@
     } catch (err) {
       console.error('Erro ao carregar catálogo do Supabase:', err);
       container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos. Tente novamente mais tarde.</div>';
+      if (modelCountDisplay) modelCountDisplay.textContent = 'Falha';
     }
   }
 
