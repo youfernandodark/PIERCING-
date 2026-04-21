@@ -1,15 +1,15 @@
 (function() {
   "use strict";
 
-  // ---------- CONFIGURAÇÃO SUPABASE ----------
-  // Substitua pelos dados do seu projeto
+  /* ---------- CONFIGURAÇÃO SUPABASE ----------
+     Substitua pelos dados do seu projeto para ativar o modo online */
   const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
   const SUPABASE_ANON_KEY = "SUA_ANON_KEY";
   
   const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && 
                                SUPABASE_URL.startsWith("https://");
-  
-  // ---------- DADOS ESTÁTICOS (catálogo local) ----------
+
+  /* ---------- DADOS ESTÁTICOS (catálogo local) ---------- */
   const staticProducts = [
     {
       id: 1,
@@ -91,7 +91,7 @@
     }
   ];
 
-  // ---------- RENDERIZAÇÃO ----------
+  /* ---------- RENDERIZAÇÃO ---------- */
   const container = document.getElementById('productContainer');
   
   function renderProducts(products) {
@@ -117,7 +117,8 @@
       html += `
         <div class="product-card">
           <div class="product-image">
-            <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" onerror="this.style.opacity='0.4'">
+            <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222222\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'12\' fill=\'%23999999\' text-anchor=\'middle\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
@@ -137,19 +138,23 @@
     container.innerHTML = html;
   }
 
-  // ---------- SUPABASE CLIENT ----------
+  /* ---------- SUPABASE CLIENT ---------- */
   let supabase = null;
+  const statusEl = document.getElementById('supabaseStatus');
+  const panelEl = document.getElementById('supabasePanel');
+  
   if (isSupabaseConfigured) {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      document.getElementById('supabasePanel').style.display = 'flex';
-      document.getElementById('supabaseStatus').innerText = ' Pronto para conectar';
+      if (panelEl) {
+        panelEl.style.display = 'flex';
+        statusEl.innerText = ' Pronto para conectar';
+      }
     } catch (e) {
       console.warn("Supabase não inicializado:", e);
     }
   } else {
-    const panel = document.getElementById('supabasePanel');
-    if (panel) panel.style.display = 'none';
+    if (panelEl) panelEl.style.display = 'none';
   }
 
   async function fetchFromSupabase() {
@@ -169,65 +174,28 @@
       try {
         const data = await fetchFromSupabase();
         renderProducts(data);
-        document.getElementById('supabaseStatus').innerText = ' Dados do Supabase';
+        statusEl.innerText = ' Dados do Supabase';
       } catch (err) {
         console.error(err);
         container.innerHTML = '<div class="error-msg">Erro ao carregar do Supabase. Usando catálogo local.</div>';
         renderProducts(staticProducts);
-        document.getElementById('supabaseStatus').innerText = ' Fallback local';
+        statusEl.innerText = ' Fallback local';
       }
     } else {
       renderProducts(staticProducts);
       if (supabase) {
-        document.getElementById('supabaseStatus').innerText = ' Catálogo local (estático)';
+        statusEl.innerText = ' Catálogo local (estático)';
       }
     }
   }
 
+  /* ---------- INICIALIZAÇÃO ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     const useSupabaseInitially = isSupabaseConfigured;
     loadCatalog(useSupabaseInitially);
     
-    const useSupabaseBtn = document.getElementById('useSupabaseBtn');
-    const useStaticBtn = document.getElementById('useStaticBtn');
-    
-    if (useSupabaseBtn) {
-      useSupabaseBtn.addEventListener('click', () => loadCatalog(true));
-    }
-    if (useStaticBtn) {
-      useStaticBtn.addEventListener('click', () => loadCatalog(false));
-    }
+    document.getElementById('useSupabaseBtn')?.addEventListener('click', () => loadCatalog(true));
+    document.getElementById('useStaticBtn')?.addEventListener('click', () => loadCatalog(false));
   });
 
 })();
-
-/*
-  ============================================
-  SQL PARA CRIAR TABELA NO SUPABASE
-  ============================================
-  Execute o script abaixo no SQL Editor do Supabase:
-  
-  CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY,
-    code VARCHAR(20) UNIQUE NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    thickness VARCHAR(20),
-    post_length_options TEXT,
-    adornment_size TEXT,
-    ball_size VARCHAR(20),
-    closure_type VARCHAR(50),
-    material VARCHAR(100) DEFAULT 'Titânio ASTM F-136',
-    stone VARCHAR(50),
-    image_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-  );
-
-  -- Inserir os produtos (exemplo com os dados fornecidos)
-  INSERT INTO products (code, name, thickness, post_length_options, adornment_size, ball_size, closure_type, material, stone, image_url) VALUES
-  ('TN54', 'Labret Stone', '1.2mm', '6mm, 8mm', '2mm, 2.5mm, 3mm', NULL, 'Rosca interna', 'Titânio ASTM F-136', 'Zircônia cúbica', 'https://cdn.dooca.store/149217/products/i4gv7ag18wggnxes422rvew637xopnjitkjh_640x640+fill_ffffff.jpg?v=1723906236&webp=0'),
-  ('TN238', 'Labret', '1.2mm', '6mm, 7mm, 8mm, 10mm, 12mm', NULL, '3mm', 'Rosca interna', 'Titânio ASTM F-136', NULL, 'https://cdn.dooca.store/149217/products/b31yhpotj21xrbpwxq0s16gnervsbmacjxhq_640x640+fill_ffffff.jpg?v=1714411709&webp=0'),
-  ('TN09', 'Microbell Curvo', '1.2mm', '6mm, 8mm, 10mm, 12mm', NULL, '3mm', 'Rosca interna', 'Titânio ASTM F-136', NULL, 'https://cdn.dooca.store/149217/products/d0opmepxmrko8qeu06nc2gqmy1gfzhivncjj_640x640+fill_ffffff.jpg?v=1715008547&webp=0'),
-  ('TN13', 'Segmento Articulado', '1.2mm', '6mm, 8mm, 10mm, 12mm', NULL, NULL, 'Clicker', 'Titânio ASTM F-136', NULL, 'https://cdn.dooca.store/149217/products/6w3ufphp0pdx5vn7ybfq929ynj2355auyf3t_640x640+fill_ffffff.jpg?v=1715006528&webp=0'),
-  ('TN57-1', 'Nostril Cravado', '1.0mm', '8mm', NULL, NULL, 'Rosca interna', 'Titânio ASTM F-136', 'Zircônia cúbica', 'https://cdn.dooca.store/149217/products/g3obdnce2820ixfm7ukowxcdzl3gjyx8aa1r_640x640+fill_ffffff.jpg?v=1715011644&webp=0'),
-  ('TN99', 'Navel Piercing', '1.6mm', '10mm', '8,0mm * 5,0mm (Médio)', NULL, 'Rosca interna', 'Titânio ASTM F-136', 'Zircônia cúbica', 'https://cdn.dooca.store/149217/products/tys0wmoqwwgff0hp5hpz6nctn3ycljmcjaaa_640x640+fill_ffffff.jpg?v=1714413218&webp=0');
-*/

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <meta name="description" content="Catálogo de joias em titânio ASTM F-136 da DARK013TATTOO. Consulte disponibilidade.">
   <title>DARK013TATTOO · Catálogo de Joias em Titânio</title>
   
   <!-- Fonte Google -->
@@ -13,43 +14,42 @@
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-  <!-- Estilos externos -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- Estilos principais -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  
-  <header class="studio-header">
-    <div class="studio-name">DARK013TATTOO</div>
-    <div class="badge">⚡ Joias em Titânio ⚡</div>
-  </header>
+  <div class="container">
+    <header class="studio-header">
+      <div class="studio-name">DARK013TATTOO</div>
+      <div class="badge">⚡ Joias em Titânio ⚡</div>
+    </header>
 
-  <!-- Painel de controle Supabase (oculto por padrão) -->
-  <div class="supabase-toggle" id="supabasePanel" style="display: none;">
-    <span style="display: flex; align-items: center; gap: 6px;">🗄️ Modo Supabase</span>
-    <div style="display: flex; gap: 10px;">
-      <button class="btn" id="useSupabaseBtn">🔄 Carregar do Supabase</button>
-      <button class="btn" id="useStaticBtn">📦 Usar catálogo local</button>
+    <!-- Painel de controle do Supabase (oculto por padrão) -->
+    <div class="supabase-toggle" id="supabasePanel" style="display: none;">
+      <span class="supabase-label">🗄️ Modo Supabase</span>
+      <div class="supabase-actions">
+        <button class="btn" id="useSupabaseBtn">🔄 Carregar do Supabase</button>
+        <button class="btn" id="useStaticBtn">📦 Usar catálogo local</button>
+      </div>
+      <span id="supabaseStatus" class="supabase-status">Não configurado</span>
     </div>
-    <span id="supabaseStatus" style="font-size:0.8rem; opacity:0.8;">Não configurado</span>
+
+    <div class="catalog-title">
+      Catálogo de Joias <span></span>
+    </div>
+
+    <!-- Container dos cards -->
+    <div id="productContainer" class="product-grid">
+      <div class="loading">Carregando catálogo...</div>
+    </div>
+
+    <footer class="footer-note">
+      DARK013TATTOO <br>
+      Consulte disponibilidade de medidas · Studio Tattoo & Piercing
+    </footer>
   </div>
 
-  <div class="catalog-title">
-    Catálogo de Joias <span></span>
-  </div>
-
-  <!-- Container dos cards -->
-  <div id="productContainer" class="product-grid">
-    <div class="loading">Carregando catálogo...</div>
-  </div>
-
-  <div class="footer-note">
-    DARK013TATTOO  <br>
-    Consulte disponibilidade de medidas · Studio Tattoo & Piercing
-  </div>
-</div>
-
-<!-- Script principal -->
-<script src="script.js" defer></script>
+  <!-- Script principal -->
+  <script src="script.js" defer></script>
 </body>
 </html>
