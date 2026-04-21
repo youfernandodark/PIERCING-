@@ -139,6 +139,20 @@ body {
   transform: scale(1.1);
 }
 
+/* NOVO SUBTÍTULO */
+.studio-subtitle {
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #a0a0a0;
+  margin-top: -5px;
+  margin-bottom: 12px;
+  padding-left: 4px;
+  border-left: 2px solid #5a5a5a;
+  padding-left: 12px;
+}
+
 .badge {
   display: inline-block;
   background: #1c1c1c;
@@ -666,6 +680,11 @@ body {
   
   .header-icon {
     font-size: 2rem;
+  }
+
+  .studio-subtitle {
+    font-size: 0.95rem;
+    margin-top: -2px;
   }
 }
 
