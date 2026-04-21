@@ -196,6 +196,29 @@ body {
   letter-spacing: 2px;
 }
 
+/* Contador de visualizações */
+.view-counter {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1a1a1a;
+  padding: 4px 14px;
+  border-radius: 30px;
+  border: 1px solid #3a3a3a;
+}
+
+.view-icon {
+  font-size: 1.2rem;
+}
+
+#viewCountValue {
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
 /* ===== TÍTULO DO CATÁLOGO ===== */
 .catalog-title {
   font-size: 1.6rem;
@@ -333,12 +356,65 @@ body {
   gap: 6px;
 }
 
+/* ===== SEÇÃO DE LIKES ===== */
+.like-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 12px;
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e1e1e;
+  border: 1px solid #3a3a3a;
+  border-radius: 40px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #d0d0d0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.like-button:hover {
+  background: #2a2a2a;
+  border-color: #7a7a7a;
+  transform: scale(1.02);
+}
+
+.like-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.like-icon {
+  font-size: 1.2rem;
+  transition: transform 0.1s;
+}
+
+.like-button:active .like-icon {
+  transform: scale(1.2);
+}
+
+.like-count {
+  font-weight: 700;
+  color: #f0f0f0;
+}
+
+.like-label {
+  font-size: 0.8rem;
+  color: #9a9a9a;
+}
+
 /* ===== INFORMAÇÕES DE ESTOQUE ===== */
 .stock-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 8px;
   padding-top: 12px;
   border-top: 1px solid #2a2a2a;
 }
