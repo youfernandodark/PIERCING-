@@ -8,106 +8,12 @@
   const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && 
                                SUPABASE_URL.startsWith("https://");
 
-  /* ---------- DADOS ESTÁTICOS (catálogo local) ---------- */
-  const staticProducts = [
-    {
-      id: 1,
-      code: "TN54",
-      name: "Labret Stone",
-      thickness: "1.2mm",
-      post_length_options: "6mm, 8mm",
-      adornment_size: "2mm, 2.5mm, 3mm",
-      ball_size: null,
-      closure_type: "Rosca interna",
-      material: "Titânio ASTM F-136",
-      stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/i4gv7ag18wggnxes422rvew637xopnjitkjh_640x640+fill_ffffff.jpg?v=1723906236&webp=0",
-      stock_quantity: 5,
-      is_available: true
-    },
-    {
-      id: 2,
-      code: "TN238",
-      name: "Labret",
-      thickness: "1.2mm",
-      post_length_options: "6mm, 7mm, 8mm, 10mm, 12mm",
-      adornment_size: null,
-      ball_size: "3mm",
-      closure_type: "Rosca interna",
-      material: "Titânio ASTM F-136",
-      stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/b31yhpotj21xrbpwxq0s16gnervsbmacjxhq_640x640+fill_ffffff.jpg?v=1714411709&webp=0",
-      stock_quantity: 2,
-      is_available: true
-    },
-    {
-      id: 3,
-      code: "TN09",
-      name: "Microbell Curvo",
-      thickness: "1.2mm",
-      post_length_options: "6mm, 8mm, 10mm, 12mm",
-      adornment_size: null,
-      ball_size: "3mm",
-      closure_type: "Rosca interna",
-      material: "Titânio ASTM F-136",
-      stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/d0opmepxmrko8qeu06nc2gqmy1gfzhivncjj_640x640+fill_ffffff.jpg?v=1715008547&webp=0",
-      stock_quantity: 0,
-      is_available: false
-    },
-    {
-      id: 4,
-      code: "TN13",
-      name: "Segmento Articulado",
-      thickness: "1.2mm",
-      post_length_options: "6mm, 8mm, 10mm, 12mm",
-      adornment_size: null,
-      ball_size: null,
-      closure_type: "Clicker",
-      material: "Titânio ASTM F-136",
-      stone: null,
-      image_url: "https://cdn.dooca.store/149217/products/6w3ufphp0pdx5vn7ybfq929ynj2355auyf3t_640x640+fill_ffffff.jpg?v=1715006528&webp=0",
-      stock_quantity: 8,
-      is_available: true
-    },
-    {
-      id: 5,
-      code: "TN57-1",
-      name: "Nostril Cravado",
-      thickness: "1.0mm",
-      post_length_options: "8mm",
-      adornment_size: null,
-      ball_size: null,
-      closure_type: "Rosca interna",
-      material: "Titânio ASTM F-136",
-      stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/g3obdnce2820ixfm7ukowxcdzl3gjyx8aa1r_640x640+fill_ffffff.jpg?v=1715011644&webp=0",
-      stock_quantity: 1,
-      is_available: true
-    },
-    {
-      id: 6,
-      code: "TN99",
-      name: "Navel Piercing",
-      thickness: "1.6mm",
-      post_length_options: "10mm",
-      adornment_size: "8,0mm * 5,0mm (Médio)",
-      ball_size: null,
-      closure_type: "Rosca interna",
-      material: "Titânio ASTM F-136",
-      stone: "Zircônia cúbica",
-      image_url: "https://cdn.dooca.store/149217/products/tys0wmoqwwgff0hp5hpz6nctn3ycljmcjaaa_640x640+fill_ffffff.jpg?v=1714413218&webp=0",
-      stock_quantity: 3,
-      is_available: true
-    }
-  ];
-
-  /* ---------- RENDERIZAÇÃO ---------- */
   const container = document.getElementById('productContainer');
   
+  /* ---------- RENDERIZAÇÃO ---------- */
   function renderProducts(products) {
     if (!products || products.length === 0) {
-      container.innerHTML = '<div class="error-msg">Nenhum produto encontrado.</div>';
+      container.innerHTML = '<div class="error-msg">Nenhum produto encontrado no catálogo.</div>';
       return;
     }
     
@@ -170,6 +76,8 @@
     } catch (e) {
       console.warn("Supabase não inicializado:", e);
     }
+  } else {
+    console.error('❌ Credenciais do Supabase não configuradas.');
   }
 
   async function fetchFromSupabase() {
@@ -186,9 +94,7 @@
   async function registerPageView() {
     if (!supabase) return;
     try {
-      await supabase.from('page_views').insert([{ 
-        page: 'catalogo',
-      }]);
+      await supabase.from('page_views').insert([{ page: 'catalogo' }]);
       console.log('📊 Visita registrada no Supabase');
     } catch (err) {
       console.warn('⚠️ Erro ao registrar visita:', err.message);
@@ -199,18 +105,18 @@
   async function loadCatalog() {
     container.innerHTML = '<div class="loading">Carregando catálogo...</div>';
     
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const data = await fetchFromSupabase();
-        renderProducts(data);
-        console.log('📦 Catálogo carregado do Supabase');
-      } catch (err) {
-        console.error('Erro ao carregar do Supabase, usando catálogo local:', err);
-        renderProducts(staticProducts);
-      }
-    } else {
-      renderProducts(staticProducts);
-      console.log('📦 Catálogo local carregado');
+    if (!isSupabaseConfigured || !supabase) {
+      container.innerHTML = '<div class="error-msg">Erro: conexão com o banco de dados não configurada.</div>';
+      return;
+    }
+
+    try {
+      const data = await fetchFromSupabase();
+      renderProducts(data);
+      console.log('📦 Catálogo carregado do Supabase');
+    } catch (err) {
+      console.error('Erro ao carregar catálogo do Supabase:', err);
+      container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos. Tente novamente mais tarde.</div>';
     }
   }
 
