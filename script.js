@@ -384,7 +384,7 @@
     const carousel = document.querySelector('.promo-carousel');
     carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
     carousel.addEventListener('mouseleave', () => {
-      intervalId = setInterval(nextSlide, 5000);
+      intervalId = setInterval(nextSlide, 8000);
     });
   }
 
