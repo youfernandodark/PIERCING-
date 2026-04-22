@@ -277,7 +277,7 @@
     }
   }
 
-  /* ---------- CARROSSEL SUAVE (SLIDE HORIZONTAL) ---------- */
+  /* ---------- CARROSSEL ---------- */
   function initPromoCarousel() {
     const slidesContainer = document.querySelector('.promo-slides');
     const slides = document.querySelectorAll('.promo-slide');
@@ -300,10 +300,8 @@
       updateCarousel(next);
     }
 
-    // Auto-play
     intervalId = setInterval(nextSlide, 5000);
 
-    // Clique nos indicadores
     indicators.forEach((ind, i) => {
       ind.addEventListener('click', () => {
         clearInterval(intervalId);
@@ -312,14 +310,12 @@
       });
     });
 
-    // Pausar ao passar o mouse
     const carousel = document.querySelector('.promo-carousel');
     carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
     carousel.addEventListener('mouseleave', () => {
       intervalId = setInterval(nextSlide, 5000);
     });
 
-    // Suporte básico a touch swipe (opcional)
     let touchStartX = 0;
     let touchEndX = 0;
     carousel.addEventListener('touchstart', (e) => {
@@ -332,12 +328,10 @@
     function handleSwipe() {
       const threshold = 50;
       if (touchEndX < touchStartX - threshold) {
-        // deslizar para esquerda -> próximo
         clearInterval(intervalId);
         nextSlide();
         intervalId = setInterval(nextSlide, 5000);
       } else if (touchEndX > touchStartX + threshold) {
-        // deslizar para direita -> anterior
         clearInterval(intervalId);
         const prev = (currentIndex - 1 + slides.length) % slides.length;
         updateCarousel(prev);
@@ -346,12 +340,88 @@
     }
   }
 
+  /* ---------- PLAYER DE RÁDIO (AUTOPLAY COM SOM, SEM MUTED) ---------- */
+  function initRadioPlayer() {
+    const audio = document.getElementById('radioAudio');
+    const playBtn = document.getElementById('radioPlayBtn');
+    const volumeSlider = document.getElementById('radioVolume');
+    
+    // Substitua pela sua rádio favorita
+    const DEFAULT_RADIO_STREAM = 'https://live.hunter.fm/kpop_stream?ag=mp3';
+    
+    if (!audio || !playBtn || !volumeSlider) return;
+    
+    audio.src = DEFAULT_RADIO_STREAM;
+    audio.volume = volumeSlider.value;
+    // Removido audio.muted = true; agora começa com som (se permitido)
+    
+    let isPlaying = false;
+    
+    // Tentar autoplay assim que possível
+    const attemptAutoplay = () => {
+      audio.play().then(() => {
+        isPlaying = true;
+        playBtn.textContent = '⏸';
+        playBtn.classList.add('playing');
+      }).catch(err => {
+        console.warn('Autoplay com som bloqueado pelo navegador:', err);
+        // Exibe uma dica visual sutil (não usa alert para não irritar)
+        playBtn.title = 'Clique para iniciar a rádio';
+        // O botão permanece como play; usuário precisará clicar
+      });
+    };
+    
+    attemptAutoplay();
+    
+    const togglePlay = () => {
+      if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = '▶';
+        playBtn.classList.remove('playing');
+      } else {
+        audio.play().catch(err => {
+          console.warn('Erro ao reproduzir rádio:', err);
+          alert('Não foi possível reproduzir a rádio. Verifique a stream ou sua conexão.');
+          return;
+        });
+        playBtn.textContent = '⏸';
+        playBtn.classList.add('playing');
+      }
+      isPlaying = !isPlaying;
+    };
+    
+    playBtn.addEventListener('click', togglePlay);
+    
+    volumeSlider.addEventListener('input', (e) => {
+      audio.volume = e.target.value;
+    });
+    
+    audio.addEventListener('pause', () => {
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      playBtn.classList.remove('playing');
+    });
+    audio.addEventListener('play', () => {
+      isPlaying = true;
+      playBtn.textContent = '⏸';
+      playBtn.classList.add('playing');
+    });
+    
+    audio.addEventListener('error', () => {
+      isPlaying = false;
+      playBtn.textContent = '▶';
+      playBtn.classList.remove('playing');
+      alert('A rádio não está disponível no momento.');
+    });
+  }
+
   /* ---------- INICIALIZAÇÃO ---------- */
   document.addEventListener('DOMContentLoaded', async () => {
     await registerPageView();
     await loadCatalog();
     await fetchAndDisplayTotalViews();
     initPromoCarousel();
+    initRadioPlayer();
   });
 
 })();

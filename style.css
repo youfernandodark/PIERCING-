@@ -63,7 +63,7 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-/* ===== CARROSSEL DE BANNERS (SUAVE - SLIDE HORIZONTAL) ===== */
+/* ===== CARROSSEL DE BANNERS ===== */
 .promo-carousel {
   position: relative;
   margin: 16px 0 28px;
@@ -233,7 +233,7 @@ body {
   transform: scale(1.2);
 }
 
-/* ===== HEADER PRINCIPAL ===== */
+/* ===== HEADER ===== */
 .studio-header {
   display: flex;
   align-items: flex-end;
@@ -585,7 +585,7 @@ body {
   color: #9a9a9a;
 }
 
-/* ===== INFORMAÇÕES DE ESTOQUE ===== */
+/* ===== ESTOQUE ===== */
 .stock-info {
   display: flex;
   align-items: center;
@@ -649,7 +649,7 @@ body {
   color: #e07070;
 }
 
-/* ===== SKELETON LOADER ===== */
+/* ===== SKELETON ===== */
 .skeleton-card {
   background: var(--bg-card);
   border-radius: 20px;
@@ -697,6 +697,114 @@ body {
   100% { opacity: 0.6; }
 }
 
+/* ===== PLAYER DE RÁDIO FLUTUANTE (MAIS TRANSPARENTE) ===== */
+.radio-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(10, 10, 10, 0.5);  /* mais transparente */
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(58, 58, 58, 0.4);
+  border-radius: 50px;
+  padding: 8px 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 1000;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.radio-player:hover {
+  background: rgba(10, 10, 10, 0.8);
+  border-color: #5a5a5a;
+}
+
+.radio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radio-play-btn {
+  background: #1e1e1e;
+  border: 1px solid #4a4a4a;
+  color: #d0d0d0;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.radio-play-btn:hover {
+  background: #2a2a2a;
+  border-color: #7a7a7a;
+  color: white;
+  transform: scale(1.05);
+}
+
+.radio-play-btn.playing {
+  background: #2a4a3a;
+  border-color: #5a9a7a;
+  color: #e0ffe0;
+}
+
+.radio-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c0c0c0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.radio-icon {
+  font-size: 1.2rem;
+}
+
+.radio-label {
+  letter-spacing: 0.5px;
+}
+
+.radio-volume {
+  display: flex;
+  align-items: center;
+}
+
+.radio-volume input[type="range"] {
+  width: 80px;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #3a3a3a;
+  border-radius: 4px;
+  outline: none;
+}
+
+.radio-volume input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #c0c0c0;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #8a8a8a;
+}
+
+.radio-volume input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #c0c0c0;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #8a8a8a;
+}
+
 /* ===== RESPONSIVIDADE ===== */
 @media (max-width: 700px) {
   .studio-header {
@@ -713,6 +821,21 @@ body {
   .studio-name { font-size: 2.5rem; }
   .header-icon { font-size: 2rem; }
   .studio-subtitle { font-size: 0.95rem; margin-top: -2px; }
+  
+  .radio-player {
+    bottom: 10px;
+    right: 10px;
+    padding: 6px 12px;
+  }
+  .radio-volume input[type="range"] {
+    width: 60px;
+  }
+  .radio-info {
+    min-width: auto;
+  }
+  .radio-label {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {
@@ -725,4 +848,9 @@ body {
 @media (max-width: 480px) {
   .studio-name { font-size: 2rem; }
   .badge { font-size: 0.8rem; padding: 6px 16px; }
+  
+  .radio-player {
+    bottom: 8px;
+    right: 8px;
+  }
 }
