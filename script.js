@@ -12,7 +12,6 @@
   const modelCountDisplay = document.getElementById('modelCountDisplay');
   const viewCountValue = document.getElementById('viewCountValue');
   
-  // Geração de token anônimo para controle de likes por usuário
   const getUserToken = () => {
     let token = localStorage.getItem('dark013_user_token');
     if (!token) {
@@ -23,7 +22,7 @@
   };
   const userToken = getUserToken();
 
-  /* ---------- RENDERIZAÇÃO (COM LIKES) ---------- */
+  /* ---------- RENDERIZAÇÃO ---------- */
   function renderProducts(products, likesMap = {}) {
     if (!products || products.length === 0) {
       container.innerHTML = '<div class="error-msg">Nenhum produto encontrado no catálogo.</div>';
@@ -31,7 +30,6 @@
       return;
     }
     
-    // Atualiza contador no cabeçalho
     if (modelCountDisplay) {
       modelCountDisplay.textContent = `${products.length} modelo${products.length > 1 ? 's' : ''}`;
     }
@@ -40,24 +38,18 @@
     products.forEach(prod => {
       const thickness = prod.thickness || '—';
       const postLength = prod.post_length_options || '—';
-      
       let adornmentDisplay = '';
       if (prod.adornment_size) adornmentDisplay = prod.adornment_size;
       else if (prod.ball_size) adornmentDisplay = `Esfera ${prod.ball_size}`;
       else adornmentDisplay = '—';
       
       const closure = prod.closure_type || '—';
-      const stoneHtml = prod.stone ? 
-        `<div class="stone-indicator">💎 ${prod.stone}</div>` : '';
-
-      // Controle de disponibilidade
+      const stoneHtml = prod.stone ? `<div class="stone-indicator">💎 ${prod.stone}</div>` : '';
       const stockQty = prod.stock_quantity ?? 0;
       const isAvailable = prod.is_available !== undefined ? prod.is_available : (stockQty > 0);
       const availabilityText = isAvailable ? 'Disponível' : 'Indisponível';
       const availabilityClass = isAvailable ? 'available' : 'unavailable';
       const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
-      
-      // Likes para este produto
       const likeCount = likesMap[prod.id] || 0;
       
       html += `
@@ -78,7 +70,6 @@
             ${stoneHtml}
             <div class="material-badge">${prod.material}</div>
             
-            <!-- Seção de likes -->
             <div class="like-section">
               <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
                 <span class="like-icon">❤️</span>
@@ -97,13 +88,11 @@
     });
     container.innerHTML = html;
 
-    // Adiciona event listeners para os botões de like
     document.querySelectorAll('.like-button').forEach(btn => {
       btn.addEventListener('click', handleLikeClick);
     });
   }
 
-  /* ---------- SKELETON LOADER ---------- */
   function renderSkeletons(count = 6) {
     if (modelCountDisplay) modelCountDisplay.textContent = '...';
     let html = '';
@@ -126,7 +115,6 @@
 
   /* ---------- SUPABASE CLIENT ---------- */
   let supabase = null;
-  
   if (isSupabaseConfigured) {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -134,8 +122,6 @@
     } catch (e) {
       console.warn("Supabase não inicializado:", e);
     }
-  } else {
-    console.error('❌ Credenciais do Supabase não configuradas.');
   }
 
   async function fetchFromSupabase() {
@@ -148,23 +134,16 @@
     return data;
   }
 
-  /* ---------- SEED AUTOMÁTICO: Insere TN10 se tabela estiver vazia ---------- */
   async function seedInitialProductIfNeeded() {
     if (!supabase) return;
-    
     try {
-      // Verifica quantos produtos existem
       const { count, error: countError } = await supabase
         .from('products')
         .select('*', { count: 'exact', head: true });
-      
       if (countError) throw countError;
-      
-      // Se já houver produtos, não faz nada
       if (count > 0) return;
       
       console.log('📦 Tabela vazia. Inserindo produto inicial TN10...');
-      
       const initialProduct = {
         code: 'TN10',
         name: 'Ferradura',
@@ -178,34 +157,21 @@
         is_available: true,
         stone: null
       };
-      
-      const { error: insertError } = await supabase
-        .from('products')
-        .insert([initialProduct]);
-      
+      const { error: insertError } = await supabase.from('products').insert([initialProduct]);
       if (insertError) throw insertError;
-      
       console.log('✅ Produto TN10 inserido com sucesso!');
     } catch (err) {
       console.warn('⚠️ Não foi possível executar o seed automático:', err.message);
-      // Não interrompe a execução – o catálogo pode estar vazio ou já ter dados
     }
   }
 
-  /* ---------- LIKES: BUSCAR / ATUALIZAR ---------- */
   async function fetchLikesForProducts(productIds) {
     if (!supabase || !productIds.length) return {};
     try {
-      const { data, error } = await supabase
-        .from('product_likes')
-        .select('product_id');
+      const { data, error } = await supabase.from('product_likes').select('product_id');
       if (error) throw error;
-      
-      // Contagem por product_id
       const counts = {};
-      data.forEach(like => {
-        counts[like.product_id] = (counts[like.product_id] || 0) + 1;
-      });
+      data.forEach(like => { counts[like.product_id] = (counts[like.product_id] || 0) + 1; });
       return counts;
     } catch (err) {
       console.warn('Erro ao buscar likes:', err);
@@ -218,20 +184,16 @@
       alert('Conexão com o servidor indisponível.');
       return { success: false };
     }
-    
     try {
-      // Verifica se o usuário já curtiu este produto
       const { data: existing, error: checkError } = await supabase
         .from('product_likes')
         .select('id')
         .eq('product_id', productId)
         .eq('user_token', userToken)
         .maybeSingle();
-      
       if (checkError) throw checkError;
       
       if (existing) {
-        // Já curtiu: remover like
         const { error: deleteError } = await supabase
           .from('product_likes')
           .delete()
@@ -239,7 +201,6 @@
         if (deleteError) throw deleteError;
         return { success: true, action: 'removed' };
       } else {
-        // Não curtiu: adicionar like
         const { error: insertError } = await supabase
           .from('product_likes')
           .insert([{ product_id: productId, user_token: userToken }]);
@@ -258,30 +219,18 @@
     const button = e.currentTarget;
     const productId = button.dataset.productId;
     if (!productId) return;
-    
-    // Desabilita temporariamente para evitar cliques duplos
     button.disabled = true;
-    
     const result = await toggleLike(productId);
-    
     if (result.success) {
-      // Atualiza contagem otimistamente
       const countSpan = document.getElementById(`like-count-${productId}`);
       if (countSpan) {
         let current = parseInt(countSpan.textContent, 10) || 0;
-        if (result.action === 'added') {
-          current += 1;
-        } else {
-          current = Math.max(0, current - 1);
-        }
-        countSpan.textContent = current;
+        countSpan.textContent = result.action === 'added' ? current + 1 : Math.max(0, current - 1);
       }
     }
-    
     button.disabled = false;
   }
 
-  /* ---------- REGISTRO DE VISITAS (page_views) E EXIBIÇÃO ---------- */
   async function registerPageView() {
     if (!supabase) return;
     try {
@@ -307,56 +256,39 @@
     }
   }
 
-  /* ---------- CARREGAMENTO DO CATÁLOGO ---------- */
   async function loadCatalog() {
-    // Exibe skeletons imediatamente
     renderSkeletons(6);
-    
     if (!isSupabaseConfigured || !supabase) {
       container.innerHTML = '<div class="error-msg">Erro: conexão com o banco de dados não configurada.</div>';
       if (modelCountDisplay) modelCountDisplay.textContent = 'Erro';
       return;
     }
-
     try {
-      // Garante que ao menos o produto TN10 exista (seed)
       await seedInitialProductIfNeeded();
-      
-      // Carrega produtos e likes em paralelo
-      const [products, _] = await Promise.all([
-        fetchFromSupabase(),
-        fetchLikesForProducts([]) // será refinado abaixo
-      ]);
-      
-      // Agora busca likes específicos para os IDs dos produtos
+      const products = await fetchFromSupabase();
       const productIds = products.map(p => p.id);
       const freshLikesMap = await fetchLikesForProducts(productIds);
-      
       renderProducts(products, freshLikesMap);
-      console.log('📦 Catálogo carregado do Supabase');
-      
-      // Atualiza visualizações totais
       await fetchAndDisplayTotalViews();
     } catch (err) {
-      console.error('Erro ao carregar catálogo do Supabase:', err);
+      console.error('Erro ao carregar catálogo:', err);
       container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos. Tente novamente mais tarde.</div>';
       if (modelCountDisplay) modelCountDisplay.textContent = 'Falha';
     }
   }
 
-  /* ---------- CARROSSEL DE BANNERS ---------- */
+  /* ---------- CARROSSEL SUAVE (SLIDE HORIZONTAL) ---------- */
   function initPromoCarousel() {
+    const slidesContainer = document.querySelector('.promo-slides');
     const slides = document.querySelectorAll('.promo-slide');
     const indicators = document.querySelectorAll('.indicator');
-    if (slides.length < 2) return;
+    if (!slidesContainer || slides.length < 2) return;
 
     let currentIndex = 0;
     let intervalId;
 
-    function showSlide(index) {
-      slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === index);
-      });
+    function updateCarousel(index) {
+      slidesContainer.style.transform = `translateX(-${index * 100}%)`;
       indicators.forEach((ind, i) => {
         ind.classList.toggle('active', i === index);
       });
@@ -365,37 +297,60 @@
 
     function nextSlide() {
       const next = (currentIndex + 1) % slides.length;
-      showSlide(next);
+      updateCarousel(next);
     }
 
-    // Troca automática a cada 5 segundos
-    intervalId = setInterval(nextSlide, 8000);
+    // Auto-play
+    intervalId = setInterval(nextSlide, 5000);
 
     // Clique nos indicadores
     indicators.forEach((ind, i) => {
       ind.addEventListener('click', () => {
         clearInterval(intervalId);
-        showSlide(i);
-        intervalId = setInterval(nextSlide, 8000);
+        updateCarousel(i);
+        intervalId = setInterval(nextSlide, 5000);
       });
     });
 
-    // Pausar ao passar o mouse (opcional)
+    // Pausar ao passar o mouse
     const carousel = document.querySelector('.promo-carousel');
     carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
     carousel.addEventListener('mouseleave', () => {
-      intervalId = setInterval(nextSlide, 8000);
+      intervalId = setInterval(nextSlide, 5000);
     });
+
+    // Suporte básico a touch swipe (opcional)
+    let touchStartX = 0;
+    let touchEndX = 0;
+    carousel.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    carousel.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+    function handleSwipe() {
+      const threshold = 50;
+      if (touchEndX < touchStartX - threshold) {
+        // deslizar para esquerda -> próximo
+        clearInterval(intervalId);
+        nextSlide();
+        intervalId = setInterval(nextSlide, 5000);
+      } else if (touchEndX > touchStartX + threshold) {
+        // deslizar para direita -> anterior
+        clearInterval(intervalId);
+        const prev = (currentIndex - 1 + slides.length) % slides.length;
+        updateCarousel(prev);
+        intervalId = setInterval(nextSlide, 5000);
+      }
+    }
   }
 
   /* ---------- INICIALIZAÇÃO ---------- */
   document.addEventListener('DOMContentLoaded', async () => {
     await registerPageView();
     await loadCatalog();
-    // Atualiza views novamente após registro
     await fetchAndDisplayTotalViews();
-    
-    // Inicializa carrossel após o carregamento
     initPromoCarousel();
   });
 

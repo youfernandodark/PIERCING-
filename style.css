@@ -19,7 +19,6 @@
   --shadow-card: 0 10px 20px -8px rgba(0,0,0,0.8);
 }
 
-/* ===== BASE ===== */
 body {
   font-family: var(--font-main);
   background: var(--bg-primary);
@@ -64,7 +63,7 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-/* ===== CARROSSEL DE BANNERS ===== */
+/* ===== CARROSSEL DE BANNERS (SUAVE - SLIDE HORIZONTAL) ===== */
 .promo-carousel {
   position: relative;
   margin: 16px 0 28px;
@@ -73,24 +72,15 @@ body {
 }
 
 .promo-slides {
-  position: relative;
-  width: 100%;
+  display: flex;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .promo-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
+  flex: 0 0 100%;
   width: 100%;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.6s ease, visibility 0.6s;
-}
-
-.promo-slide.active {
-  position: relative;
-  opacity: 1;
-  visibility: visible;
+  box-sizing: border-box;
 }
 
 .promo-banner {
@@ -243,12 +233,7 @@ body {
   transform: scale(1.2);
 }
 
-/* Ajuste para manter altura estável durante transição */
-.promo-slides {
-  min-height: 200px;
-}
-
-/* ===== HEADER PRINCIPAL (SPLIT LAYOUT) ===== */
+/* ===== HEADER PRINCIPAL ===== */
 .studio-header {
   display: flex;
   align-items: flex-end;
@@ -262,7 +247,6 @@ body {
   gap: 20px;
 }
 
-/* Efeito de névoa metálica */
 .studio-header::before {
   content: "";
   position: absolute;
@@ -300,8 +284,6 @@ body {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  
-  /* Efeito gradiente + brilho */
   background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b0b0b0 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -323,7 +305,6 @@ body {
   transform: scale(1.1);
 }
 
-/* NOVO SUBTÍTULO */
 .studio-subtitle {
   font-size: 1.1rem;
   font-weight: 400;
@@ -332,7 +313,6 @@ body {
   color: #a0a0a0;
   margin-top: -5px;
   margin-bottom: 12px;
-  padding-left: 4px;
   border-left: 2px solid #5a5a5a;
   padding-left: 12px;
 }
@@ -394,7 +374,6 @@ body {
   letter-spacing: 2px;
 }
 
-/* Contador de visualizações */
 .view-counter {
   margin-top: 8px;
   font-size: 0.9rem;
@@ -417,7 +396,6 @@ body {
   color: #e0e0e0;
 }
 
-/* ===== TÍTULO DO CATÁLOGO ===== */
 .catalog-title {
   font-size: 1.6rem;
   font-weight: 400;
@@ -661,7 +639,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* ===== ESTADOS DE CARREGAMENTO/ERRO ===== */
 .loading, .error-msg {
   text-align: center;
   padding: 40px;
@@ -702,17 +679,9 @@ body {
   width: 100%;
 }
 
-.skeleton-line.short {
-  width: 60%;
-}
-
-.skeleton-line.medium {
-  width: 80%;
-}
-
-.skeleton-line.long {
-  width: 100%;
-}
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 80%; }
+.skeleton-line.long { width: 100%; }
 
 .skeleton-badge {
   height: 28px;
@@ -734,67 +703,26 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
-  
   .header-right {
     align-items: flex-start;
     text-align: left;
     width: 100%;
   }
-  
-  .model-count {
-    font-size: 1.5rem;
-  }
-  
-  .material-grade {
-    font-size: 1.4rem;
-  }
-  
-  .studio-name {
-    font-size: 2.5rem;
-  }
-  
-  .header-icon {
-    font-size: 2rem;
-  }
-
-  .studio-subtitle {
-    font-size: 0.95rem;
-    margin-top: -2px;
-  }
-  
-  .promo-slides {
-    min-height: 260px;
-  }
+  .model-count { font-size: 1.5rem; }
+  .material-grade { font-size: 1.4rem; }
+  .studio-name { font-size: 2.5rem; }
+  .header-icon { font-size: 2rem; }
+  .studio-subtitle { font-size: 0.95rem; margin-top: -2px; }
 }
 
 @media (max-width: 600px) {
-  .promo-banner {
-    padding: 18px 16px;
-  }
-  
-  .promo-banner__content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .promo-banner__visual {
-    justify-content: center;
-    width: 100%;
-    font-size: 2.8rem;
-  }
-  
-  .promo-banner__title {
-    font-size: 2rem;
-  }
+  .promo-banner { padding: 18px 16px; }
+  .promo-banner__content { flex-direction: column; align-items: flex-start; }
+  .promo-banner__visual { justify-content: center; width: 100%; font-size: 2.8rem; }
+  .promo-banner__title { font-size: 2rem; }
 }
 
 @media (max-width: 480px) {
-  .studio-name {
-    font-size: 2rem;
-  }
-  
-  .badge {
-    font-size: 0.8rem;
-    padding: 6px 16px;
-  }
+  .studio-name { font-size: 2rem; }
+  .badge { font-size: 0.8rem; padding: 6px 16px; }
 }
