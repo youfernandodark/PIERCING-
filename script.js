@@ -369,14 +369,14 @@
     }
 
     // Troca automática a cada 5 segundos
-    intervalId = setInterval(nextSlide, 5000);
+    intervalId = setInterval(nextSlide, 8000);
 
     // Clique nos indicadores
     indicators.forEach((ind, i) => {
       ind.addEventListener('click', () => {
         clearInterval(intervalId);
         showSlide(i);
-        intervalId = setInterval(nextSlide, 5000);
+        intervalId = setInterval(nextSlide, 8000);
       });
     });
 
