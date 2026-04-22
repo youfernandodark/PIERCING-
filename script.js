@@ -344,12 +344,59 @@
     }
   }
 
+  /* ---------- CARROSSEL DE BANNERS ---------- */
+  function initPromoCarousel() {
+    const slides = document.querySelectorAll('.promo-slide');
+    const indicators = document.querySelectorAll('.indicator');
+    if (slides.length < 2) return;
+
+    let currentIndex = 0;
+    let intervalId;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      indicators.forEach((ind, i) => {
+        ind.classList.toggle('active', i === index);
+      });
+      currentIndex = index;
+    }
+
+    function nextSlide() {
+      const next = (currentIndex + 1) % slides.length;
+      showSlide(next);
+    }
+
+    // Troca automática a cada 5 segundos
+    intervalId = setInterval(nextSlide, 5000);
+
+    // Clique nos indicadores
+    indicators.forEach((ind, i) => {
+      ind.addEventListener('click', () => {
+        clearInterval(intervalId);
+        showSlide(i);
+        intervalId = setInterval(nextSlide, 5000);
+      });
+    });
+
+    // Pausar ao passar o mouse (opcional)
+    const carousel = document.querySelector('.promo-carousel');
+    carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
+    carousel.addEventListener('mouseleave', () => {
+      intervalId = setInterval(nextSlide, 5000);
+    });
+  }
+
   /* ---------- INICIALIZAÇÃO ---------- */
   document.addEventListener('DOMContentLoaded', async () => {
     await registerPageView();
     await loadCatalog();
     // Atualiza views novamente após registro
     await fetchAndDisplayTotalViews();
+    
+    // Inicializa carrossel após o carregamento
+    initPromoCarousel();
   });
 
 })();
