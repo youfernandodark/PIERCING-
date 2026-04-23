@@ -80,16 +80,16 @@
     return null;
   }
 
-  /* ---------- FILTROS E ORDENAÇÃO ---------- */
+  /* ---------- FILTROS E ORDENAÇÃO (CORRIGIDO) ---------- */
   function filterAndSortProducts() {
     let filtered = [...allProducts];
     
-    // Busca textual
+    // Busca textual (segura contra null/undefined)
     if (currentFilter.search) {
       const term = currentFilter.search.toLowerCase();
       filtered = filtered.filter(p => 
-        p.code?.toLowerCase().includes(term) || 
-        p.name?.toLowerCase().includes(term)
+        (p.code ?? '').toLowerCase().includes(term) || 
+        (p.name ?? '').toLowerCase().includes(term)
       );
     }
     
@@ -101,10 +101,10 @@
     // Ordenação
     switch (currentFilter.sort) {
       case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        filtered.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
         break;
       case 'name-desc':
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
+        filtered.sort((a, b) => (b.name ?? '').localeCompare(a.name ?? ''));
         break;
       case 'likes':
         filtered.sort((a, b) => (likesMap[b.id] || 0) - (likesMap[a.id] || 0));
@@ -406,6 +406,7 @@
     }
   }
 
+  /* ---------- CARREGAMENTO DO CATÁLOGO (CORRIGIDO) ---------- */
   async function loadCatalog() {
     renderSkeletons(6);
     if (!isSupabaseConfigured || !supabase) {
@@ -437,7 +438,12 @@
       await fetchAndDisplayTotalViews();
     } catch (err) {
       console.error('Erro ao carregar catálogo:', err);
-      container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos.</div>';
+      // Se já existem produtos em tela (veio do cache), manter a exibição atual
+      if (allProducts.length > 0) {
+        showToast('Não foi possível atualizar os dados. Exibindo versão em cache.', 'warning');
+      } else {
+        container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos.</div>';
+      }
     }
   }
 
@@ -489,12 +495,12 @@
       currentIndex = index;
     };
     const nextSlide = () => updateCarousel((currentIndex + 1) % slides.length);
-    intervalId = setInterval(nextSlide, 5000);
+    intervalId = setInterval(nextSlide, 8000);
 
     indicators.forEach((ind, i) => ind.addEventListener('click', () => {
       clearInterval(intervalId);
       updateCarousel(i);
-      intervalId = setInterval(nextSlide, 5000);
+      intervalId = setInterval(nextSlide, 8000);
     }));
 
     const carousel = document.querySelector('.promo-carousel');
@@ -514,6 +520,7 @@
     });
   }
 
+  /* ---------- RÁDIO (CORRIGIDO) ---------- */
   function initRadioPlayer() {
     const audio = document.getElementById('radioAudio');
     const playBtn = document.getElementById('radioPlayBtn');
@@ -521,12 +528,14 @@
     const muteBtn = document.getElementById('radioMuteBtn');
     const stationName = document.getElementById('radioStationName');
     
-    const STREAM_URL = 'https://live.hunter.fm/kpop_stream?ag=mp3';
-    if (!audio) return;
+    // Se algum controle essencial não existir, não inicializa
+    if (!audio || !playBtn || !volumeSlider || !muteBtn) return;
     
+    const STREAM_URL = 'https://live.hunter.fm/kpop_stream?ag=mp3';
     audio.src = STREAM_URL;
     audio.volume = volumeSlider.value;
-    stationName.textContent = 'Hunter FM K-pop';
+    
+    if (stationName) stationName.textContent = 'Hunter FM K-pop';
     
     let isPlaying = false, lastVolume = audio.volume;
     
@@ -548,7 +557,7 @@
         playBtn.textContent = '▶';
         playBtn.classList.remove('playing');
       } else {
-        audio.play().catch(err => showToast('Erro ao reproduzir rádio', 'error'));
+        audio.play().catch(() => showToast('Erro ao reproduzir rádio', 'error'));
         playBtn.textContent = '⏸';
         playBtn.classList.add('playing');
       }
@@ -557,11 +566,7 @@
     
     volumeSlider.addEventListener('input', (e) => {
       audio.volume = e.target.value;
-      if (audio.volume > 0) {
-        muteBtn.textContent = '🔊';
-      } else {
-        muteBtn.textContent = '🔇';
-      }
+      muteBtn.textContent = audio.volume > 0 ? '🔊' : '🔇';
     });
     
     muteBtn.addEventListener('click', () => {
