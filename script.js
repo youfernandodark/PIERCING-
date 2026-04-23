@@ -12,9 +12,6 @@
   let likesMap = {};
   let currentFilter = { search: '', onlyAvailable: false, sort: 'default' };
   
-  // Novo: mapa de disponibilidade por produto -> { [haste_mm]: boolean }
-  let variantsMap = {};
-
   const CACHE_KEY = 'dark013_catalog_cache';
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
@@ -62,12 +59,11 @@
   }
 
   /* ---------- CACHE LOCAL ---------- */
-  function saveToCache(products, likes, variants) {
+  function saveToCache(products, likes) {
     const cache = {
       timestamp: Date.now(),
       products: products,
-      likes: likes,
-      variants: variants
+      likes: likes
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   }
@@ -88,6 +84,7 @@
   function filterAndSortProducts() {
     let filtered = [...allProducts];
     
+    // Busca textual
     if (currentFilter.search) {
       const term = currentFilter.search.toLowerCase();
       filtered = filtered.filter(p => 
@@ -96,10 +93,12 @@
       );
     }
     
+    // Apenas disponíveis
     if (currentFilter.onlyAvailable) {
       filtered = filtered.filter(p => p.is_available && p.stock_quantity > 0);
     }
     
+    // Ordenação
     switch (currentFilter.sort) {
       case 'name':
         filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -128,29 +127,6 @@
   }
 
   /* ---------- RENDERIZAÇÃO ---------- */
-  function renderHastesOptions(productId) {
-    // Retorna HTML com as medidas riscadas se indisponíveis
-    const variants = variantsMap[productId];
-    if (!variants) {
-      // fallback: se não houver variantes registradas, mostra string antiga
-      const product = allProducts.find(p => p.id == productId);
-      return `<span class="spec-value">${product?.post_length_options || '—'}</span>`;
-    }
-    
-    // Converte objeto {6: true, 7: false, ...} em array e ordena
-    const hastes = Object.entries(variants)
-      .map(([mm, disponivel]) => ({ mm: parseInt(mm), disponivel }))
-      .sort((a, b) => a.mm - b.mm);
-    
-    return hastes.map(({mm, disponivel}) => {
-      return `<span class="haste-option" style="
-        text-decoration: ${disponivel ? 'none' : 'line-through'};
-        opacity: ${disponivel ? 1 : 0.5};
-        margin-right: 8px;
-      ">${mm}mm</span>`;
-    }).join('');
-  }
-
   function renderProducts() {
     const filtered = filterAndSortProducts();
     
@@ -165,7 +141,7 @@
     let html = '';
     filtered.forEach(prod => {
       const thickness = prod.thickness || '—';
-      const hastesHtml = renderHastesOptions(prod.id);
+      const postLength = prod.post_length_options || '—';
       let adornmentDisplay = prod.adornment_size || (prod.ball_size ? `Esfera ${prod.ball_size}` : '—');
       const closure = prod.closure_type || '—';
       const stoneHtml = prod.stone ? `<div class="stone-indicator">💎 ${prod.stone}</div>` : '';
@@ -189,7 +165,7 @@
             <div class="product-name">${prod.name}</div>
             <div class="specs">
               <div class="spec-item"><span class="spec-label">Espessura</span> <span class="spec-value">${thickness}</span></div>
-              <div class="spec-item"><span class="spec-label">Haste</span> <div style="display: inline-flex; flex-wrap: wrap;">${hastesHtml}</div></div>
+              <div class="spec-item"><span class="spec-label">Haste</span> <span class="spec-value">${postLength}</span></div>
               <div class="spec-item"><span class="spec-label">Adereço/Esfera</span> <span class="spec-value">${adornmentDisplay}</span></div>
               <div class="spec-item"><span class="spec-label">Trava</span> <span class="spec-value">${closure}</span></div>
             </div>
@@ -252,7 +228,7 @@
   function openModal(product) {
     const likeCount = likesMap[product.id] || 0;
     const thickness = product.thickness || '—';
-    const hastesHtml = renderHastesOptions(product.id);
+    const postLength = product.post_length_options || '—';
     const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : '—');
     const stockQty = product.stock_quantity ?? 0;
     const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
@@ -266,7 +242,7 @@
       ${product.stone ? `<div class="stone-indicator">💎 ${product.stone}</div>` : ''}
       <div class="modal-specs">
         <div class="modal-spec-item"><span class="modal-spec-label">Espessura</span><span class="modal-spec-value">${thickness}</span></div>
-        <div class="modal-spec-item"><span class="modal-spec-label">Haste</span><div style="display: flex; flex-wrap: wrap;">${hastesHtml}</div></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Haste</span><span class="modal-spec-value">${postLength}</span></div>
         <div class="modal-spec-item"><span class="modal-spec-label">Adereço/Esfera</span><span class="modal-spec-value">${adornment}</span></div>
         <div class="modal-spec-item"><span class="modal-spec-label">Trava</span><span class="modal-spec-value">${product.closure_type || '—'}</span></div>
         <div class="modal-spec-item"><span class="modal-spec-label">Disponibilidade</span><span class="modal-spec-value">${isAvailable ? `${stockQty} un.` : 'Indisponível'}</span></div>
@@ -377,25 +353,6 @@
     return data;
   }
 
-  async function fetchAllVariants() {
-    if (!supabase) return {};
-    try {
-      const { data, error } = await supabase.from('product_variants').select('product_id, haste_mm, disponivel');
-      if (error) throw error;
-      
-      const map = {};
-      data.forEach(row => {
-        const pid = row.product_id;
-        if (!map[pid]) map[pid] = {};
-        map[pid][row.haste_mm] = row.disponivel;
-      });
-      return map;
-    } catch (err) {
-      console.warn('Erro ao buscar variantes:', err);
-      return {};
-    }
-  }
-
   async function fetchLikesForProducts(productIds) {
     if (!supabase || !productIds.length) return {};
     try {
@@ -422,21 +379,8 @@
         image_url: 'https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg',
         stock_quantity: 10, is_available: true, stone: null
       };
-      const { data, error } = await supabase.from('products').insert([initialProduct]).select();
-      if (error) throw error;
-      
-      // Se inseriu com sucesso, criar variantes padrão (todas disponíveis)
-      if (data && data.length > 0) {
-        const newId = data[0].id;
-        const hastes = [6, 8, 10, 12];
-        const variantsToInsert = hastes.map(mm => ({
-          product_id: newId,
-          haste_mm: mm,
-          disponivel: true
-        }));
-        await supabase.from('product_variants').insert(variantsToInsert);
-        console.log('✅ Produto TN10 e variantes inseridos');
-      }
+      await supabase.from('products').insert([initialProduct]);
+      console.log('✅ Produto TN10 inserido');
     } catch (err) {
       console.warn('⚠️ Seed automático falhou:', err.message);
     }
@@ -475,24 +419,19 @@
       if (cached) {
         allProducts = cached.products;
         likesMap = cached.likes;
-        variantsMap = cached.variants || {};
         renderProducts();
         await fetchAndDisplayTotalViews();
       }
       
       // Buscar dados frescos
       await seedInitialProductIfNeeded();
-      const [products, variants] = await Promise.all([
-        fetchFromSupabase(),
-        fetchAllVariants()
-      ]);
+      const products = await fetchFromSupabase();
       const productIds = products.map(p => p.id);
       const freshLikesMap = await fetchLikesForProducts(productIds);
       
       allProducts = products;
       likesMap = freshLikesMap;
-      variantsMap = variants;
-      saveToCache(products, freshLikesMap, variants);
+      saveToCache(products, freshLikesMap);
       
       renderProducts();
       await fetchAndDisplayTotalViews();
