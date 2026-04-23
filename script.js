@@ -4,14 +4,34 @@
   /* ---------- CONFIGURAÇÃO SUPABASE ---------- */
   const SUPABASE_URL = "https://hruldvebruatjcwaoozd.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhydWxkdmVicnVhdGpjd2Fvb3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NjI2ODQsImV4cCI6MjA5MjMzODY4NH0.bWxI30NlY53ZBgGChW6xrdRtygiAt9Zt2oHZAD49ZQU";
-  
-  const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && 
-                               SUPABASE_URL.startsWith("https://");
+  const isSupabaseConfigured = SUPABASE_URL.includes("SEU_PROJETO") === false && SUPABASE_URL.startsWith("https://");
 
+  /* ---------- ESTADO GLOBAL ---------- */
+  let supabase = null;
+  let allProducts = [];
+  let likesMap = {};
+  let currentFilter = { search: '', onlyAvailable: false, sort: 'default' };
+  
+  // Novo: mapa de disponibilidade por produto -> { [haste_mm]: boolean }
+  let variantsMap = {};
+
+  const CACHE_KEY = 'dark013_catalog_cache';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+  /* ---------- ELEMENTOS DOM ---------- */
   const container = document.getElementById('productContainer');
   const modelCountDisplay = document.getElementById('modelCountDisplay');
   const viewCountValue = document.getElementById('viewCountValue');
-  
+  const searchInput = document.getElementById('searchInput');
+  const clearSearchBtn = document.getElementById('clearSearch');
+  const sortSelect = document.getElementById('sortSelect');
+  const filterAvailableBtn = document.getElementById('filterAvailableBtn');
+  const modal = document.getElementById('productModal');
+  const modalBody = document.getElementById('modalBody');
+  const modalClose = document.querySelector('.modal-close');
+  const modalOverlay = document.querySelector('.modal-overlay');
+
+  /* ---------- UTILITÁRIOS ---------- */
   const getUserToken = () => {
     let token = localStorage.getItem('dark013_user_token');
     if (!token) {
@@ -22,27 +42,131 @@
   };
   const userToken = getUserToken();
 
+  function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  /* ---------- SUPABASE CLIENT ---------- */
+  if (isSupabaseConfigured) {
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Supabase inicializado');
+    } catch (e) {
+      console.warn("Supabase não inicializado:", e);
+    }
+  }
+
+  /* ---------- CACHE LOCAL ---------- */
+  function saveToCache(products, likes, variants) {
+    const cache = {
+      timestamp: Date.now(),
+      products: products,
+      likes: likes,
+      variants: variants
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  }
+
+  function loadFromCache() {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    try {
+      const data = JSON.parse(cached);
+      if (Date.now() - data.timestamp < CACHE_DURATION) {
+        return data;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  /* ---------- FILTROS E ORDENAÇÃO ---------- */
+  function filterAndSortProducts() {
+    let filtered = [...allProducts];
+    
+    if (currentFilter.search) {
+      const term = currentFilter.search.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.code?.toLowerCase().includes(term) || 
+        p.name?.toLowerCase().includes(term)
+      );
+    }
+    
+    if (currentFilter.onlyAvailable) {
+      filtered = filtered.filter(p => p.is_available && p.stock_quantity > 0);
+    }
+    
+    switch (currentFilter.sort) {
+      case 'name':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name-desc':
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case 'likes':
+        filtered.sort((a, b) => (likesMap[b.id] || 0) - (likesMap[a.id] || 0));
+        break;
+      case 'availability':
+        filtered.sort((a, b) => {
+          const aAvail = (a.is_available && a.stock_quantity > 0) ? 1 : 0;
+          const bAvail = (b.is_available && b.stock_quantity > 0) ? 1 : 0;
+          return bAvail - aAvail;
+        });
+        break;
+    }
+    
+    return filtered;
+  }
+
+  function updateFilterUI() {
+    clearSearchBtn.style.display = currentFilter.search ? 'block' : 'none';
+    filterAvailableBtn.setAttribute('aria-pressed', currentFilter.onlyAvailable);
+  }
+
   /* ---------- RENDERIZAÇÃO ---------- */
-  function renderProducts(products, likesMap = {}) {
-    if (!products || products.length === 0) {
-      container.innerHTML = '<div class="error-msg">Nenhum produto encontrado no catálogo.</div>';
-      if (modelCountDisplay) modelCountDisplay.textContent = '0 modelos';
+  function renderHastesOptions(productId) {
+    // Retorna HTML com as medidas riscadas se indisponíveis
+    const variants = variantsMap[productId];
+    if (!variants) {
+      // fallback: se não houver variantes registradas, mostra string antiga
+      const product = allProducts.find(p => p.id == productId);
+      return `<span class="spec-value">${product?.post_length_options || '—'}</span>`;
+    }
+    
+    // Converte objeto {6: true, 7: false, ...} em array e ordena
+    const hastes = Object.entries(variants)
+      .map(([mm, disponivel]) => ({ mm: parseInt(mm), disponivel }))
+      .sort((a, b) => a.mm - b.mm);
+    
+    return hastes.map(({mm, disponivel}) => {
+      return `<span class="haste-option" style="
+        text-decoration: ${disponivel ? 'none' : 'line-through'};
+        opacity: ${disponivel ? 1 : 0.5};
+        margin-right: 8px;
+      ">${mm}mm</span>`;
+    }).join('');
+  }
+
+  function renderProducts() {
+    const filtered = filterAndSortProducts();
+    
+    if (!filtered.length) {
+      container.innerHTML = '<div class="error-msg">Nenhum produto encontrado.</div>';
+      modelCountDisplay.textContent = '0 modelos';
       return;
     }
     
-    if (modelCountDisplay) {
-      modelCountDisplay.textContent = `${products.length} modelo${products.length > 1 ? 's' : ''}`;
-    }
+    modelCountDisplay.textContent = `${filtered.length} modelo${filtered.length > 1 ? 's' : ''}`;
     
     let html = '';
-    products.forEach(prod => {
+    filtered.forEach(prod => {
       const thickness = prod.thickness || '—';
-      const postLength = prod.post_length_options || '—';
-      let adornmentDisplay = '';
-      if (prod.adornment_size) adornmentDisplay = prod.adornment_size;
-      else if (prod.ball_size) adornmentDisplay = `Esfera ${prod.ball_size}`;
-      else adornmentDisplay = '—';
-      
+      const hastesHtml = renderHastesOptions(prod.id);
+      let adornmentDisplay = prod.adornment_size || (prod.ball_size ? `Esfera ${prod.ball_size}` : '—');
       const closure = prod.closure_type || '—';
       const stoneHtml = prod.stone ? `<div class="stone-indicator">💎 ${prod.stone}</div>` : '';
       const stockQty = prod.stock_quantity ?? 0;
@@ -51,19 +175,21 @@
       const availabilityClass = isAvailable ? 'available' : 'unavailable';
       const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
       const likeCount = likesMap[prod.id] || 0;
+      const lowStock = stockQty > 0 && stockQty <= 2;
       
       html += `
         <div class="product-card" data-product-id="${prod.id}">
           <div class="product-image">
+            ${lowStock ? '<span class="low-stock-badge">🔥 Últimas unidades</span>' : ''}
             <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23222222\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'12\' fill=\'%23999999\' text-anchor=\'middle\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
             <div class="product-name">${prod.name}</div>
             <div class="specs">
               <div class="spec-item"><span class="spec-label">Espessura</span> <span class="spec-value">${thickness}</span></div>
-              <div class="spec-item"><span class="spec-label">Haste</span> <span class="spec-value">${postLength}</span></div>
+              <div class="spec-item"><span class="spec-label">Haste</span> <div style="display: inline-flex; flex-wrap: wrap;">${hastesHtml}</div></div>
               <div class="spec-item"><span class="spec-label">Adereço/Esfera</span> <span class="spec-value">${adornmentDisplay}</span></div>
               <div class="spec-item"><span class="spec-label">Trava</span> <span class="spec-value">${closure}</span></div>
             </div>
@@ -88,13 +214,22 @@
     });
     container.innerHTML = html;
 
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.like-button')) return;
+        const id = card.dataset.productId;
+        const product = allProducts.find(p => p.id == id);
+        if (product) openModal(product);
+      });
+    });
+
     document.querySelectorAll('.like-button').forEach(btn => {
       btn.addEventListener('click', handleLikeClick);
     });
   }
 
   function renderSkeletons(count = 6) {
-    if (modelCountDisplay) modelCountDisplay.textContent = '...';
+    modelCountDisplay.textContent = '...';
     let html = '';
     for (let i = 0; i < count; i++) {
       html += `
@@ -113,75 +248,75 @@
     container.innerHTML = html;
   }
 
-  /* ---------- SUPABASE CLIENT ---------- */
-  let supabase = null;
-  if (isSupabaseConfigured) {
-    try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('✅ Supabase inicializado');
-    } catch (e) {
-      console.warn("Supabase não inicializado:", e);
-    }
+  /* ---------- MODAL ---------- */
+  function openModal(product) {
+    const likeCount = likesMap[product.id] || 0;
+    const thickness = product.thickness || '—';
+    const hastesHtml = renderHastesOptions(product.id);
+    const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : '—');
+    const stockQty = product.stock_quantity ?? 0;
+    const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
+    
+    modalBody.innerHTML = `
+      <div class="modal-image">
+        <img src="${product.image_url}" alt="${product.name}" id="modalProductImage">
+      </div>
+      <div class="modal-title">${product.name}</div>
+      <div class="modal-code">${product.code} · ${product.material}</div>
+      ${product.stone ? `<div class="stone-indicator">💎 ${product.stone}</div>` : ''}
+      <div class="modal-specs">
+        <div class="modal-spec-item"><span class="modal-spec-label">Espessura</span><span class="modal-spec-value">${thickness}</span></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Haste</span><div style="display: flex; flex-wrap: wrap;">${hastesHtml}</div></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Adereço/Esfera</span><span class="modal-spec-value">${adornment}</span></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Trava</span><span class="modal-spec-value">${product.closure_type || '—'}</span></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Disponibilidade</span><span class="modal-spec-value">${isAvailable ? `${stockQty} un.` : 'Indisponível'}</span></div>
+        <div class="modal-spec-item"><span class="modal-spec-label">Curtidas</span><span class="modal-spec-value" id="modalLikeCount">${likeCount}</span></div>
+      </div>
+      <div class="modal-actions">
+        <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de informações sobre a joia ${product.code} - ${product.name}" class="modal-whatsapp-btn" target="_blank">
+          <span>💬</span> Consultar no WhatsApp
+        </a>
+        <button class="modal-like-btn" id="modalLikeBtn" data-product-id="${product.id}">
+          <span class="like-icon">❤️</span> Curtir
+        </button>
+      </div>
+    `;
+    
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    
+    document.getElementById('modalLikeBtn').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      const id = btn.dataset.productId;
+      btn.disabled = true;
+      const result = await toggleLike(id);
+      if (result.success) {
+        const newCount = result.action === 'added' ? likeCount + 1 : Math.max(0, likeCount - 1);
+        document.getElementById('modalLikeCount').textContent = newCount;
+        const cardCount = document.getElementById(`like-count-${id}`);
+        if (cardCount) cardCount.textContent = newCount;
+        likesMap[id] = newCount;
+        showToast(result.action === 'added' ? '❤️ Curtiu!' : '💔 Curtida removida');
+      }
+      btn.disabled = false;
+    });
+
+    // Zoom simples na imagem do modal
+    const modalImg = document.getElementById('modalProductImage');
+    modalImg.addEventListener('click', () => {
+      modalImg.style.transform = modalImg.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
+    });
   }
 
-  async function fetchFromSupabase() {
-    if (!supabase) throw new Error("Supabase não configurado.");
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: true });
-    if (error) throw error;
-    return data;
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
   }
 
-  async function seedInitialProductIfNeeded() {
-    if (!supabase) return;
-    try {
-      const { count, error: countError } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
-      if (countError) throw countError;
-      if (count > 0) return;
-      
-      console.log('📦 Tabela vazia. Inserindo produto inicial TN10...');
-      const initialProduct = {
-        code: 'TN10',
-        name: 'Ferradura',
-        thickness: '1.2mm',
-        post_length_options: '6mm, 8mm, 10mm, 12mm',
-        ball_size: '3mm',
-        closure_type: 'Rosca interna',
-        material: 'Titânio ASTM F-136',
-        image_url: 'https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg?v=1714414393&webp=0',
-        stock_quantity: 10,
-        is_available: true,
-        stone: null
-      };
-      const { error: insertError } = await supabase.from('products').insert([initialProduct]);
-      if (insertError) throw insertError;
-      console.log('✅ Produto TN10 inserido com sucesso!');
-    } catch (err) {
-      console.warn('⚠️ Não foi possível executar o seed automático:', err.message);
-    }
-  }
-
-  async function fetchLikesForProducts(productIds) {
-    if (!supabase || !productIds.length) return {};
-    try {
-      const { data, error } = await supabase.from('product_likes').select('product_id');
-      if (error) throw error;
-      const counts = {};
-      data.forEach(like => { counts[like.product_id] = (counts[like.product_id] || 0) + 1; });
-      return counts;
-    } catch (err) {
-      console.warn('Erro ao buscar likes:', err);
-      return {};
-    }
-  }
-
+  /* ---------- LIKES ---------- */
   async function toggleLike(productId) {
     if (!supabase) {
-      alert('Conexão com o servidor indisponível.');
+      showToast('Conexão indisponível', 'error');
       return { success: false };
     }
     try {
@@ -209,13 +344,13 @@
       }
     } catch (err) {
       console.error('Erro ao processar like:', err);
-      alert('Não foi possível registrar sua curtida. Tente novamente.');
+      showToast('Erro ao curtir', 'error');
       return { success: false };
     }
   }
 
   async function handleLikeClick(e) {
-    e.preventDefault();
+    e.stopPropagation();
     const button = e.currentTarget;
     const productId = button.dataset.productId;
     if (!productId) return;
@@ -225,17 +360,92 @@
       const countSpan = document.getElementById(`like-count-${productId}`);
       if (countSpan) {
         let current = parseInt(countSpan.textContent, 10) || 0;
-        countSpan.textContent = result.action === 'added' ? current + 1 : Math.max(0, current - 1);
+        const newCount = result.action === 'added' ? current + 1 : Math.max(0, current - 1);
+        countSpan.textContent = newCount;
+        likesMap[productId] = newCount;
       }
+      showToast(result.action === 'added' ? '❤️ Curtiu!' : '💔 Curtida removida');
     }
     button.disabled = false;
+  }
+
+  /* ---------- DADOS ---------- */
+  async function fetchFromSupabase() {
+    if (!supabase) throw new Error("Supabase não configurado.");
+    const { data, error } = await supabase.from('products').select('*').order('id', { ascending: true });
+    if (error) throw error;
+    return data;
+  }
+
+  async function fetchAllVariants() {
+    if (!supabase) return {};
+    try {
+      const { data, error } = await supabase.from('product_variants').select('product_id, haste_mm, disponivel');
+      if (error) throw error;
+      
+      const map = {};
+      data.forEach(row => {
+        const pid = row.product_id;
+        if (!map[pid]) map[pid] = {};
+        map[pid][row.haste_mm] = row.disponivel;
+      });
+      return map;
+    } catch (err) {
+      console.warn('Erro ao buscar variantes:', err);
+      return {};
+    }
+  }
+
+  async function fetchLikesForProducts(productIds) {
+    if (!supabase || !productIds.length) return {};
+    try {
+      const { data, error } = await supabase.from('product_likes').select('product_id');
+      if (error) throw error;
+      const counts = {};
+      data.forEach(like => { counts[like.product_id] = (counts[like.product_id] || 0) + 1; });
+      return counts;
+    } catch (err) {
+      console.warn('Erro ao buscar likes:', err);
+      return {};
+    }
+  }
+
+  async function seedInitialProductIfNeeded() {
+    if (!supabase) return;
+    try {
+      const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
+      if (count > 0) return;
+      
+      const initialProduct = {
+        code: 'TN10', name: 'Ferradura', thickness: '1.2mm', post_length_options: '6mm, 8mm, 10mm, 12mm',
+        ball_size: '3mm', closure_type: 'Rosca interna', material: 'Titânio ASTM F-136',
+        image_url: 'https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg',
+        stock_quantity: 10, is_available: true, stone: null
+      };
+      const { data, error } = await supabase.from('products').insert([initialProduct]).select();
+      if (error) throw error;
+      
+      // Se inseriu com sucesso, criar variantes padrão (todas disponíveis)
+      if (data && data.length > 0) {
+        const newId = data[0].id;
+        const hastes = [6, 8, 10, 12];
+        const variantsToInsert = hastes.map(mm => ({
+          product_id: newId,
+          haste_mm: mm,
+          disponivel: true
+        }));
+        await supabase.from('product_variants').insert(variantsToInsert);
+        console.log('✅ Produto TN10 e variantes inseridos');
+      }
+    } catch (err) {
+      console.warn('⚠️ Seed automático falhou:', err.message);
+    }
   }
 
   async function registerPageView() {
     if (!supabase) return;
     try {
       await supabase.from('page_views').insert([{ page: 'catalogo' }]);
-      console.log('📊 Visita registrada no Supabase');
     } catch (err) {
       console.warn('⚠️ Erro ao registrar visita:', err.message);
     }
@@ -244,14 +454,10 @@
   async function fetchAndDisplayTotalViews() {
     if (!supabase || !viewCountValue) return;
     try {
-      const { count, error } = await supabase
-        .from('page_views')
-        .select('*', { count: 'exact', head: true })
-        .eq('page', 'catalogo');
+      const { count, error } = await supabase.from('page_views').select('*', { count: 'exact', head: true }).eq('page', 'catalogo');
       if (error) throw error;
       viewCountValue.textContent = count || 0;
     } catch (err) {
-      console.warn('Erro ao buscar total de visualizações:', err);
       viewCountValue.textContent = '?';
     }
   }
@@ -260,140 +466,176 @@
     renderSkeletons(6);
     if (!isSupabaseConfigured || !supabase) {
       container.innerHTML = '<div class="error-msg">Erro: conexão com o banco de dados não configurada.</div>';
-      if (modelCountDisplay) modelCountDisplay.textContent = 'Erro';
       return;
     }
+    
     try {
+      // Tentar cache primeiro
+      const cached = loadFromCache();
+      if (cached) {
+        allProducts = cached.products;
+        likesMap = cached.likes;
+        variantsMap = cached.variants || {};
+        renderProducts();
+        await fetchAndDisplayTotalViews();
+      }
+      
+      // Buscar dados frescos
       await seedInitialProductIfNeeded();
-      const products = await fetchFromSupabase();
+      const [products, variants] = await Promise.all([
+        fetchFromSupabase(),
+        fetchAllVariants()
+      ]);
       const productIds = products.map(p => p.id);
       const freshLikesMap = await fetchLikesForProducts(productIds);
-      renderProducts(products, freshLikesMap);
+      
+      allProducts = products;
+      likesMap = freshLikesMap;
+      variantsMap = variants;
+      saveToCache(products, freshLikesMap, variants);
+      
+      renderProducts();
       await fetchAndDisplayTotalViews();
     } catch (err) {
       console.error('Erro ao carregar catálogo:', err);
-      container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos. Tente novamente mais tarde.</div>';
-      if (modelCountDisplay) modelCountDisplay.textContent = 'Falha';
+      container.innerHTML = '<div class="error-msg">Falha ao carregar os produtos.</div>';
     }
   }
 
-  /* ---------- CARROSSEL ---------- */
+  /* ---------- EVENT LISTENERS ---------- */
+  function initFilters() {
+    searchInput.addEventListener('input', (e) => {
+      currentFilter.search = e.target.value;
+      updateFilterUI();
+      renderProducts();
+    });
+    
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      currentFilter.search = '';
+      updateFilterUI();
+      renderProducts();
+    });
+    
+    sortSelect.addEventListener('change', (e) => {
+      currentFilter.sort = e.target.value;
+      renderProducts();
+    });
+    
+    filterAvailableBtn.addEventListener('click', () => {
+      currentFilter.onlyAvailable = !currentFilter.onlyAvailable;
+      updateFilterUI();
+      renderProducts();
+    });
+  }
+
+  function initModal() {
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+    });
+  }
+
   function initPromoCarousel() {
     const slidesContainer = document.querySelector('.promo-slides');
     const slides = document.querySelectorAll('.promo-slide');
     const indicators = document.querySelectorAll('.indicator');
     if (!slidesContainer || slides.length < 2) return;
 
-    let currentIndex = 0;
-    let intervalId;
-
-    function updateCarousel(index) {
+    let currentIndex = 0, intervalId;
+    const updateCarousel = (index) => {
       slidesContainer.style.transform = `translateX(-${index * 100}%)`;
-      indicators.forEach((ind, i) => {
-        ind.classList.toggle('active', i === index);
-      });
+      indicators.forEach((ind, i) => ind.classList.toggle('active', i === index));
       currentIndex = index;
-    }
-
-    function nextSlide() {
-      const next = (currentIndex + 1) % slides.length;
-      updateCarousel(next);
-    }
-
+    };
+    const nextSlide = () => updateCarousel((currentIndex + 1) % slides.length);
     intervalId = setInterval(nextSlide, 5000);
 
-    indicators.forEach((ind, i) => {
-      ind.addEventListener('click', () => {
-        clearInterval(intervalId);
-        updateCarousel(i);
-        intervalId = setInterval(nextSlide, 5000);
-      });
-    });
+    indicators.forEach((ind, i) => ind.addEventListener('click', () => {
+      clearInterval(intervalId);
+      updateCarousel(i);
+      intervalId = setInterval(nextSlide, 5000);
+    }));
 
     const carousel = document.querySelector('.promo-carousel');
     carousel.addEventListener('mouseenter', () => clearInterval(intervalId));
-    carousel.addEventListener('mouseleave', () => {
-      intervalId = setInterval(nextSlide, 5000);
-    });
+    carousel.addEventListener('mouseleave', () => intervalId = setInterval(nextSlide, 5000));
 
-    let touchStartX = 0;
-    let touchEndX = 0;
-    carousel.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
+    let touchStartX = 0, touchEndX = 0;
+    carousel.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX, { passive: true });
     carousel.addEventListener('touchend', (e) => {
       touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    });
-    function handleSwipe() {
       const threshold = 50;
       if (touchEndX < touchStartX - threshold) {
-        clearInterval(intervalId);
-        nextSlide();
-        intervalId = setInterval(nextSlide, 5000);
+        clearInterval(intervalId); nextSlide(); intervalId = setInterval(nextSlide, 5000);
       } else if (touchEndX > touchStartX + threshold) {
-        clearInterval(intervalId);
-        const prev = (currentIndex - 1 + slides.length) % slides.length;
-        updateCarousel(prev);
-        intervalId = setInterval(nextSlide, 5000);
+        clearInterval(intervalId); updateCarousel((currentIndex - 1 + slides.length) % slides.length); intervalId = setInterval(nextSlide, 5000);
       }
-    }
+    });
   }
 
-  /* ---------- PLAYER DE RÁDIO (AUTOPLAY COM SOM, SEM MUTED) ---------- */
   function initRadioPlayer() {
     const audio = document.getElementById('radioAudio');
     const playBtn = document.getElementById('radioPlayBtn');
     const volumeSlider = document.getElementById('radioVolume');
+    const muteBtn = document.getElementById('radioMuteBtn');
+    const stationName = document.getElementById('radioStationName');
     
-    // Substitua pela sua rádio favorita
-    const DEFAULT_RADIO_STREAM = 'https://live.hunter.fm/kpop_stream?ag=mp3';
+    const STREAM_URL = 'https://live.hunter.fm/kpop_stream?ag=mp3';
+    if (!audio) return;
     
-    if (!audio || !playBtn || !volumeSlider) return;
-    
-    audio.src = DEFAULT_RADIO_STREAM;
+    audio.src = STREAM_URL;
     audio.volume = volumeSlider.value;
-    // Removido audio.muted = true; agora começa com som (se permitido)
+    stationName.textContent = 'Hunter FM K-pop';
     
-    let isPlaying = false;
+    let isPlaying = false, lastVolume = audio.volume;
     
-    // Tentar autoplay assim que possível
     const attemptAutoplay = () => {
       audio.play().then(() => {
         isPlaying = true;
         playBtn.textContent = '⏸';
         playBtn.classList.add('playing');
       }).catch(err => {
-        console.warn('Autoplay com som bloqueado pelo navegador:', err);
-        // Exibe uma dica visual sutil (não usa alert para não irritar)
+        console.warn('Autoplay bloqueado:', err);
         playBtn.title = 'Clique para iniciar a rádio';
-        // O botão permanece como play; usuário precisará clicar
       });
     };
-    
     attemptAutoplay();
     
-    const togglePlay = () => {
+    playBtn.addEventListener('click', () => {
       if (isPlaying) {
         audio.pause();
         playBtn.textContent = '▶';
         playBtn.classList.remove('playing');
       } else {
-        audio.play().catch(err => {
-          console.warn('Erro ao reproduzir rádio:', err);
-          alert('Não foi possível reproduzir a rádio. Verifique a stream ou sua conexão.');
-          return;
-        });
+        audio.play().catch(err => showToast('Erro ao reproduzir rádio', 'error'));
         playBtn.textContent = '⏸';
         playBtn.classList.add('playing');
       }
       isPlaying = !isPlaying;
-    };
-    
-    playBtn.addEventListener('click', togglePlay);
+    });
     
     volumeSlider.addEventListener('input', (e) => {
       audio.volume = e.target.value;
+      if (audio.volume > 0) {
+        muteBtn.textContent = '🔊';
+      } else {
+        muteBtn.textContent = '🔇';
+      }
+    });
+    
+    muteBtn.addEventListener('click', () => {
+      if (audio.volume > 0) {
+        lastVolume = audio.volume;
+        audio.volume = 0;
+        volumeSlider.value = 0;
+        muteBtn.textContent = '🔇';
+      } else {
+        audio.volume = lastVolume || 0.5;
+        volumeSlider.value = audio.volume;
+        muteBtn.textContent = '🔊';
+      }
     });
     
     audio.addEventListener('pause', () => {
@@ -406,12 +648,11 @@
       playBtn.textContent = '⏸';
       playBtn.classList.add('playing');
     });
-    
     audio.addEventListener('error', () => {
       isPlaying = false;
       playBtn.textContent = '▶';
       playBtn.classList.remove('playing');
-      alert('A rádio não está disponível no momento.');
+      showToast('Rádio indisponível', 'error');
     });
   }
 
@@ -419,7 +660,8 @@
   document.addEventListener('DOMContentLoaded', async () => {
     await registerPageView();
     await loadCatalog();
-    await fetchAndDisplayTotalViews();
+    initFilters();
+    initModal();
     initPromoCarousel();
     initRadioPlayer();
   });
