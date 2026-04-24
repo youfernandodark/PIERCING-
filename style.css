@@ -384,7 +384,7 @@ select:focus-visible,
   100% { transform: translateX(-50%); }
 }
 
-/* ===== CARROSSEL (mantido) ===== */
+/* ===== CARROSSEL ===== */
 .promo-carousel {
   position: relative;
   margin: 16px 0 28px;
@@ -874,7 +874,7 @@ select:focus-visible,
   border: 1px solid #8a8a8a;
 }
 
-/* ===== SLIDE DO ARTISTA (NOVOS ESTILOS) ===== */
+/* ===== SLIDE DO ARTISTA ===== */
 .promo-banner--artist {
   background-size: cover;
   background-position: center 30%;
@@ -911,6 +911,31 @@ select:focus-visible,
 .promo-banner__subtitle--artist {
   color: #f0f0f0;
   font-weight: 500;
+}
+
+/* Botão "Conheça o Artista" no slide */
+.artist-modal-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 60px;
+  border: 1px solid #5a5a5a;
+  transition: all 0.2s;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px #00000040;
+  cursor: pointer;
+}
+
+.artist-modal-trigger:hover {
+  background: #2a2a2a;
+  border-color: #aaa;
+  color: #fff;
+  transform: scale(1.02);
 }
 
 /* ===== RESPONSIVIDADE ===== */

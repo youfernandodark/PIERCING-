@@ -49,6 +49,22 @@
     </div>
   </div>
 
+  <!-- Modal do Artista -->
+  <div id="artistModal" class="modal" aria-hidden="true">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="artistModalTitle">
+      <button class="modal-close" aria-label="Fechar modal">&times;</button>
+      <div class="modal-body">
+        <h2 id="artistModalTitle" style="font-size:1.8rem; margin-bottom:16px; color:#f0f0f0;">DARK013TATTOO</h2>
+        <p style="font-size:1rem; line-height:1.7; color:#d0d0d0; white-space:pre-line;">
+          Fernando Dark sou tatuador, desenhista e skatista, gosto de cozinhar, anime, kpop, rock e da cultura asiática. Não sou de muitas amizades, mas sou gente boa, amo as coisas que faço.
+          Todos os dias acordo com o objetivo de ser melhor pra mim e para as pessoas que amo.
+          Obrigado a todos que curtem meu trabalho 😍
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- Barra de anúncio deslizante (marquee) -->
   <div class="top-marquee">
     <div class="marquee-content">
@@ -143,18 +159,23 @@
             </div>
           </div>
         </div>
-        <!-- Slide 4: Banner do Tatuador (NOVO) -->
+        <!-- Slide 4: Banner do Tatuador -->
         <div class="promo-slide">
-          <div class="promo-banner promo-banner--artist" style="background-image: url('https://drive.google.com/uc?export=view&id=1DG9ZI6EAYx4_TjinafmWgxE90uU8a5Fe');">
+          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/gLdgcN0m/IMG-20250817-171554-861.jpg');">
             <div class="promo-banner__overlay">
               <div class="promo-banner__content">
                 <div class="promo-banner__text">
                   <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça o artista</span>
                   <h2 class="promo-banner__title promo-banner__title--artist">DARK013TATTOO</h2>
                   <p class="promo-banner__subtitle promo-banner__subtitle--artist">Agende nossos serviços</p>
-                  <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de agendar um serviço na DARK013TATTOO" class="promo-banner__cta" target="_blank">
-                    <span>💬</span> Chamar no WhatsApp
-                  </a>
+                  <div class="modal-actions" style="flex-direction: column; gap: 10px; margin-top: 20px;">
+                    <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de agendar um serviço na DARK013TATTOO" class="promo-banner__cta" target="_blank">
+                      <span>💬</span> Chamar no WhatsApp
+                    </a>
+                    <button type="button" class="promo-banner__cta artist-modal-trigger" style="background: #1a1a1a; border-color: #4a4a4a;">
+                      👤 Conheça o Artista
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

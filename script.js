@@ -84,7 +84,6 @@
   function filterAndSortProducts() {
     let filtered = [...allProducts];
     
-    // Busca textual (segura contra null/undefined)
     if (currentFilter.search) {
       const term = currentFilter.search.toLowerCase();
       filtered = filtered.filter(p => 
@@ -93,12 +92,10 @@
       );
     }
     
-    // Apenas disponíveis
     if (currentFilter.onlyAvailable) {
       filtered = filtered.filter(p => p.is_available && p.stock_quantity > 0);
     }
     
-    // Ordenação
     switch (currentFilter.sort) {
       case 'name':
         filtered.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
@@ -277,7 +274,6 @@
       btn.disabled = false;
     });
 
-    // Zoom simples na imagem do modal
     const modalImg = document.getElementById('modalProductImage');
     modalImg.addEventListener('click', () => {
       modalImg.style.transform = modalImg.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
@@ -406,7 +402,7 @@
     }
   }
 
-  /* ---------- CARREGAMENTO DO CATÁLOGO (CORRIGIDO) ---------- */
+  /* ---------- CARREGAMENTO DO CATÁLOGO ---------- */
   async function loadCatalog() {
     renderSkeletons(6);
     if (!isSupabaseConfigured || !supabase) {
@@ -415,7 +411,6 @@
     }
     
     try {
-      // Tentar cache primeiro
       const cached = loadFromCache();
       if (cached) {
         allProducts = cached.products;
@@ -424,7 +419,6 @@
         await fetchAndDisplayTotalViews();
       }
       
-      // Buscar dados frescos
       await seedInitialProductIfNeeded();
       const products = await fetchFromSupabase();
       const productIds = products.map(p => p.id);
@@ -438,7 +432,6 @@
       await fetchAndDisplayTotalViews();
     } catch (err) {
       console.error('Erro ao carregar catálogo:', err);
-      // Se já existem produtos em tela (veio do cache), manter a exibição atual
       if (allProducts.length > 0) {
         showToast('Não foi possível atualizar os dados. Exibindo versão em cache.', 'warning');
       } else {
@@ -475,11 +468,43 @@
   }
 
   function initModal() {
+    // Modal de produto
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', closeModal);
+
+    // Modal do Artista
+    const artistModal = document.getElementById('artistModal');
+    const artistClose = artistModal.querySelector('.modal-close');
+    const artistOverlay = artistModal.querySelector('.modal-overlay');
+
+    function openArtistModal() {
+      artistModal.classList.add('active');
+      artistModal.setAttribute('aria-hidden', 'false');
+    }
+    function closeArtistModal() {
+      artistModal.classList.remove('active');
+      artistModal.setAttribute('aria-hidden', 'true');
+    }
+
+    // Fechar ambos com Esc
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
+      if (e.key === 'Escape') {
+        if (modal.classList.contains('active')) closeModal();
+        if (artistModal.classList.contains('active')) closeArtistModal();
+      }
     });
+
+    // Delegar clique no botão do slide
+    document.body.addEventListener('click', (e) => {
+      if (e.target.closest('.artist-modal-trigger')) {
+        e.preventDefault();
+        openArtistModal();
+      }
+    });
+
+    // Fechar pelo X e overlay do modal de artista
+    artistClose.addEventListener('click', closeArtistModal);
+    artistOverlay.addEventListener('click', closeArtistModal);
   }
 
   function initPromoCarousel() {
@@ -520,7 +545,7 @@
     });
   }
 
-  /* ---------- RÁDIO (CORRIGIDO) ---------- */
+  /* ---------- RÁDIO ---------- */
   function initRadioPlayer() {
     const audio = document.getElementById('radioAudio');
     const playBtn = document.getElementById('radioPlayBtn');
@@ -528,7 +553,6 @@
     const muteBtn = document.getElementById('radioMuteBtn');
     const stationName = document.getElementById('radioStationName');
     
-    // Se algum controle essencial não existir, não inicializa
     if (!audio || !playBtn || !volumeSlider || !muteBtn) return;
     
     const STREAM_URL = 'https://live.hunter.fm/kpop_stream?ag=mp3';
