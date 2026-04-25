@@ -80,7 +80,19 @@
     return null;
   }
 
-  /* ---------- FILTROS E ORDENAÇÃO (CORRIGIDO) ---------- */
+  /* ---------- DESCRIÇÃO AUTOMÁTICA ---------- */
+  function gerarDescricao(prod) {
+    const partes = [];
+    if (prod.thickness) partes.push(`Espessura ${prod.thickness}`);
+    if (prod.post_length_options) partes.push(`Haste ${prod.post_length_options}`);
+    const adornment = prod.adornment_size || (prod.ball_size ? `Esfera ${prod.ball_size}` : null);
+    if (adornment) partes.push(`Adereço ${adornment}`);
+    if (prod.stone) partes.push(`com ${prod.stone}`);
+    if (prod.closure_type) partes.push(`Trava ${prod.closure_type}`);
+    return partes.join(' · ');
+  }
+
+  /* ---------- FILTROS E ORDENAÇÃO ---------- */
   function filterAndSortProducts() {
     let filtered = [...allProducts];
     
@@ -149,13 +161,21 @@
       const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
       const likeCount = likesMap[prod.id] || 0;
       const lowStock = stockQty > 0 && stockQty <= 2;
+      const descricao = prod.description || gerarDescricao(prod);
       
       html += `
         <div class="product-card" data-product-id="${prod.id}">
           <div class="product-image">
             ${lowStock ? '<span class="low-stock-badge">🔥 Últimas unidades</span>' : ''}
-            <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
+            <div class="image-wrapper">
+              <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
+                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
+              <div class="image-overlay">
+                <button class="quick-view-btn" data-product-id="${prod.id}">
+                  <span>👁️</span> Ver detalhes
+                </button>
+              </div>
+            </div>
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
@@ -167,6 +187,7 @@
               <div class="spec-item"><span class="spec-label">Trava</span> <span class="spec-value">${closure}</span></div>
             </div>
             ${stoneHtml}
+            <p class="product-description">${descricao}</p>
             <div class="material-badge">${prod.material}</div>
             
             <div class="like-section">
@@ -187,9 +208,10 @@
     });
     container.innerHTML = html;
 
+    // Eventos de clique nos cards (exceto botões)
     document.querySelectorAll('.product-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.like-button')) return;
+        if (e.target.closest('.like-button') || e.target.closest('.quick-view-btn')) return;
         const id = card.dataset.productId;
         const product = allProducts.find(p => p.id == id);
         if (product) openModal(product);
@@ -229,6 +251,7 @@
     const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : '—');
     const stockQty = product.stock_quantity ?? 0;
     const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
+    const descricao = product.description || gerarDescricao(product);
     
     modalBody.innerHTML = `
       <div class="modal-image">
@@ -237,6 +260,7 @@
       <div class="modal-title">${product.name}</div>
       <div class="modal-code">${product.code} · ${product.material}</div>
       ${product.stone ? `<div class="stone-indicator">💎 ${product.stone}</div>` : ''}
+      <p class="product-description" style="border-left-color:#5a5a5a; margin-bottom:20px;">${descricao}</p>
       <div class="modal-specs">
         <div class="modal-spec-item"><span class="modal-spec-label">Espessura</span><span class="modal-spec-value">${thickness}</span></div>
         <div class="modal-spec-item"><span class="modal-spec-label">Haste</span><span class="modal-spec-value">${postLength}</span></div>
@@ -499,6 +523,15 @@
       if (e.target.closest('.artist-modal-trigger')) {
         e.preventDefault();
         openArtistModal();
+      }
+      
+      // Botão "Ver detalhes" do card
+      const quickBtn = e.target.closest('.quick-view-btn');
+      if (quickBtn) {
+        e.stopPropagation();
+        const id = quickBtn.dataset.productId;
+        const product = allProducts.find(p => p.id == id);
+        if (product) openModal(product);
       }
     });
 
