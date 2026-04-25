@@ -170,6 +170,14 @@
             ${lowStock ? '<span class="low-stock-badge">🔥 Últimas unidades</span>' : ''}
             <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
+            <!-- LIKE NA IMAGEM -->
+            <div class="like-section">
+              <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
+                <span class="like-icon">❤️</span>
+                <span class="like-count" id="like-count-${prod.id}">${likeCount}</span>
+              </button>
+              <span class="like-label">curtidas</span>
+            </div>
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
@@ -188,14 +196,6 @@
             </button>
             <div class="product-description" id="desc-${prod.id}">
               <p>${description}</p>
-            </div>
-
-            <div class="like-section">
-              <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
-                <span class="like-icon">❤️</span>
-                <span class="like-count" id="like-count-${prod.id}">${likeCount}</span>
-              </button>
-              <span class="like-label">curtidas</span>
             </div>
 
             <div class="stock-info">
