@@ -13,7 +13,7 @@
   let currentFilter = { search: '', onlyAvailable: false, sort: 'default' };
   
   const CACHE_KEY = 'dark013_catalog_cache';
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+  const CACHE_DURATION = 5 * 60 * 1000;
 
   /* ---------- ELEMENTOS DOM ---------- */
   const container = document.getElementById('productContainer');
@@ -80,16 +80,17 @@
     return null;
   }
 
-  /* ---------- DESCRIÇÃO AUTOMÁTICA ---------- */
-  function gerarDescricao(prod) {
-    const partes = [];
-    if (prod.thickness) partes.push(`Espessura ${prod.thickness}`);
-    if (prod.post_length_options) partes.push(`Haste ${prod.post_length_options}`);
-    const adornment = prod.adornment_size || (prod.ball_size ? `Esfera ${prod.ball_size}` : null);
-    if (adornment) partes.push(`Adereço ${adornment}`);
-    if (prod.stone) partes.push(`com ${prod.stone}`);
-    if (prod.closure_type) partes.push(`Trava ${prod.closure_type}`);
-    return partes.join(' · ');
+  /* ---------- GERA DESCRIÇÃO AUTOMÁTICA ---------- */
+  function generateDescription(product) {
+    const thickness = product.thickness || 'indisponível';
+    const postLength = product.post_length_options || 'indisponível';
+    const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : 'indisponível');
+    const closure = product.closure_type || 'indisponível';
+    const stone = product.stone ? ` com detalhe em ${product.stone}` : '';
+    
+    return `Joia confeccionada em ${product.material}, material hipoalergênico e biocompatível. ` +
+           `Espessura de ${thickness}, haste de ${postLength}, adereço ${adornment} e trava do tipo ${closure}${stone}. ` +
+           `Ideal para piercings que exigem conforto e durabilidade.`;
   }
 
   /* ---------- FILTROS E ORDENAÇÃO ---------- */
@@ -161,21 +162,14 @@
       const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
       const likeCount = likesMap[prod.id] || 0;
       const lowStock = stockQty > 0 && stockQty <= 2;
-      const descricao = prod.description || gerarDescricao(prod);
+      const description = generateDescription(prod);
       
       html += `
         <div class="product-card" data-product-id="${prod.id}">
           <div class="product-image">
             ${lowStock ? '<span class="low-stock-badge">🔥 Últimas unidades</span>' : ''}
-            <div class="image-wrapper">
-              <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
-                   onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
-              <div class="image-overlay">
-                <button class="quick-view-btn" data-product-id="${prod.id}">
-                  <span>👁️</span> Ver detalhes
-                </button>
-              </div>
-            </div>
+            <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
+                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
@@ -187,9 +181,15 @@
               <div class="spec-item"><span class="spec-label">Trava</span> <span class="spec-value">${closure}</span></div>
             </div>
             ${stoneHtml}
-            <p class="product-description">${descricao}</p>
             <div class="material-badge">${prod.material}</div>
             
+            <button class="desc-button" data-product-id="${prod.id}">
+              <span>📄</span> Descrição
+            </button>
+            <div class="product-description" id="desc-${prod.id}">
+              <p>${description}</p>
+            </div>
+
             <div class="like-section">
               <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
                 <span class="like-icon">❤️</span>
@@ -208,10 +208,9 @@
     });
     container.innerHTML = html;
 
-    // Eventos de clique nos cards (exceto botões)
     document.querySelectorAll('.product-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.like-button') || e.target.closest('.quick-view-btn')) return;
+        if (e.target.closest('.like-button, .desc-button')) return;
         const id = card.dataset.productId;
         const product = allProducts.find(p => p.id == id);
         if (product) openModal(product);
@@ -220,6 +219,10 @@
 
     document.querySelectorAll('.like-button').forEach(btn => {
       btn.addEventListener('click', handleLikeClick);
+    });
+
+    document.querySelectorAll('.desc-button').forEach(btn => {
+      btn.addEventListener('click', handleDescClick);
     });
   }
 
@@ -251,7 +254,7 @@
     const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : '—');
     const stockQty = product.stock_quantity ?? 0;
     const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
-    const descricao = product.description || gerarDescricao(product);
+    const description = generateDescription(product);
     
     modalBody.innerHTML = `
       <div class="modal-image">
@@ -260,7 +263,6 @@
       <div class="modal-title">${product.name}</div>
       <div class="modal-code">${product.code} · ${product.material}</div>
       ${product.stone ? `<div class="stone-indicator">💎 ${product.stone}</div>` : ''}
-      <p class="product-description" style="border-left-color:#5a5a5a; margin-bottom:20px;">${descricao}</p>
       <div class="modal-specs">
         <div class="modal-spec-item"><span class="modal-spec-label">Espessura</span><span class="modal-spec-value">${thickness}</span></div>
         <div class="modal-spec-item"><span class="modal-spec-label">Haste</span><span class="modal-spec-value">${postLength}</span></div>
@@ -270,18 +272,27 @@
         <div class="modal-spec-item"><span class="modal-spec-label">Curtidas</span><span class="modal-spec-value" id="modalLikeCount">${likeCount}</span></div>
       </div>
       <div class="modal-actions">
-        <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de informações sobre a joia ${product.code} - ${product.name}" class="modal-whatsapp-btn" target="_blank">
-          <span>💬</span> Consultar no WhatsApp
-        </a>
+        <button class="modal-desc-btn" id="modalDescBtn">
+          <span>📄</span> Descrição
+        </button>
         <button class="modal-like-btn" id="modalLikeBtn" data-product-id="${product.id}">
           <span class="like-icon">❤️</span> Curtir
         </button>
+      </div>
+      <div class="modal-description" id="modalDescription">
+        <p>${description}</p>
       </div>
     `;
     
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     
+    // Handler para descrição no modal
+    document.getElementById('modalDescBtn').addEventListener('click', () => {
+      const descDiv = document.getElementById('modalDescription');
+      descDiv.classList.toggle('visible');
+    });
+
     document.getElementById('modalLikeBtn').addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const id = btn.dataset.productId;
@@ -363,6 +374,16 @@
       showToast(result.action === 'added' ? '❤️ Curtiu!' : '💔 Curtida removida');
     }
     button.disabled = false;
+  }
+
+  function handleDescClick(e) {
+    e.stopPropagation();
+    const button = e.currentTarget;
+    const productId = button.dataset.productId;
+    const descDiv = document.getElementById(`desc-${productId}`);
+    if (descDiv) {
+      descDiv.classList.toggle('visible');
+    }
   }
 
   /* ---------- DADOS ---------- */
@@ -492,11 +513,9 @@
   }
 
   function initModal() {
-    // Modal de produto
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', closeModal);
 
-    // Modal do Artista
     const artistModal = document.getElementById('artistModal');
     const artistClose = artistModal.querySelector('.modal-close');
     const artistOverlay = artistModal.querySelector('.modal-overlay');
@@ -510,7 +529,6 @@
       artistModal.setAttribute('aria-hidden', 'true');
     }
 
-    // Fechar ambos com Esc
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (modal.classList.contains('active')) closeModal();
@@ -518,24 +536,13 @@
       }
     });
 
-    // Delegar clique no botão do slide
     document.body.addEventListener('click', (e) => {
       if (e.target.closest('.artist-modal-trigger')) {
         e.preventDefault();
         openArtistModal();
       }
-      
-      // Botão "Ver detalhes" do card
-      const quickBtn = e.target.closest('.quick-view-btn');
-      if (quickBtn) {
-        e.stopPropagation();
-        const id = quickBtn.dataset.productId;
-        const product = allProducts.find(p => p.id == id);
-        if (product) openModal(product);
-      }
     });
 
-    // Fechar pelo X e overlay do modal de artista
     artistClose.addEventListener('click', closeArtistModal);
     artistOverlay.addEventListener('click', closeArtistModal);
   }
