@@ -13,7 +13,7 @@
   let currentFilter = { search: '', onlyAvailable: false, sort: 'default' };
   
   const CACHE_KEY = 'dark013_catalog_cache';
-  const CACHE_DURATION = 5 * 60 * 1000;
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
   /* ---------- ELEMENTOS DOM ---------- */
   const container = document.getElementById('productContainer');
@@ -27,6 +27,10 @@
   const modalBody = document.getElementById('modalBody');
   const modalClose = document.querySelector('.modal-close');
   const modalOverlay = document.querySelector('.modal-overlay');
+  const artistModal = document.getElementById('artistModal');
+  const artistModalBody = document.getElementById('artistModalBody');
+  const artistModalClose = document.querySelector('.artist-modal-close');
+  const artistModalOverlay = artistModal ? artistModal.querySelector('.modal-overlay') : null;
 
   /* ---------- UTILITÁRIOS ---------- */
   const getUserToken = () => {
@@ -78,19 +82,6 @@
       }
     } catch (e) {}
     return null;
-  }
-
-  /* ---------- GERA DESCRIÇÃO AUTOMÁTICA ---------- */
-  function generateDescription(product) {
-    const thickness = product.thickness || 'indisponível';
-    const postLength = product.post_length_options || 'indisponível';
-    const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : 'indisponível');
-    const closure = product.closure_type || 'indisponível';
-    const stone = product.stone ? ` com detalhe em ${product.stone}` : '';
-    
-    return `Joia confeccionada em ${product.material}, material hipoalergênico e biocompatível. ` +
-           `Espessura de ${thickness}, haste de ${postLength}, adereço ${adornment} e trava do tipo ${closure}${stone}. ` +
-           `Ideal para piercings que exigem conforto e durabilidade.`;
   }
 
   /* ---------- FILTROS E ORDENAÇÃO ---------- */
@@ -162,7 +153,6 @@
       const stockDisplay = stockQty > 0 ? `${stockQty} unidade${stockQty > 1 ? 's' : ''}` : 'Esgotado';
       const likeCount = likesMap[prod.id] || 0;
       const lowStock = stockQty > 0 && stockQty <= 2;
-      const description = generateDescription(prod);
       
       html += `
         <div class="product-card" data-product-id="${prod.id}">
@@ -170,14 +160,6 @@
             ${lowStock ? '<span class="low-stock-badge">🔥 Últimas unidades</span>' : ''}
             <img src="${prod.image_url}" alt="${prod.name}" loading="lazy" 
                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23222222\\'/%3E%3Ctext x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'12\\' fill=\\'%23999999\\' text-anchor=\\'middle\\'%3ESem imagem%3C/text%3E%3C/svg%3E'; this.style.opacity='1'">
-            <!-- LIKE NA IMAGEM -->
-            <div class="like-section">
-              <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
-                <span class="like-icon">❤️</span>
-                <span class="like-count" id="like-count-${prod.id}">${likeCount}</span>
-              </button>
-              <span class="like-label">curtidas</span>
-            </div>
           </div>
           <div class="product-info">
             <div class="product-code">${prod.code}</div>
@@ -191,11 +173,12 @@
             ${stoneHtml}
             <div class="material-badge">${prod.material}</div>
             
-            <button class="desc-button" data-product-id="${prod.id}">
-              <span>📄</span> Descrição
-            </button>
-            <div class="product-description" id="desc-${prod.id}">
-              <p>${description}</p>
+            <div class="like-section">
+              <button class="like-button" data-product-id="${prod.id}" aria-label="Curtir produto">
+                <span class="like-icon">❤️</span>
+                <span class="like-count" id="like-count-${prod.id}">${likeCount}</span>
+              </button>
+              <span class="like-label">curtidas</span>
             </div>
 
             <div class="stock-info">
@@ -210,7 +193,7 @@
 
     document.querySelectorAll('.product-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.like-button, .desc-button')) return;
+        if (e.target.closest('.like-button')) return;
         const id = card.dataset.productId;
         const product = allProducts.find(p => p.id == id);
         if (product) openModal(product);
@@ -219,10 +202,6 @@
 
     document.querySelectorAll('.like-button').forEach(btn => {
       btn.addEventListener('click', handleLikeClick);
-    });
-
-    document.querySelectorAll('.desc-button').forEach(btn => {
-      btn.addEventListener('click', handleDescClick);
     });
   }
 
@@ -246,7 +225,7 @@
     container.innerHTML = html;
   }
 
-  /* ---------- MODAL ---------- */
+  /* ---------- MODAL DE PRODUTO ---------- */
   function openModal(product) {
     const likeCount = likesMap[product.id] || 0;
     const thickness = product.thickness || '—';
@@ -254,7 +233,6 @@
     const adornment = product.adornment_size || (product.ball_size ? `Esfera ${product.ball_size}` : '—');
     const stockQty = product.stock_quantity ?? 0;
     const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
-    const description = generateDescription(product);
     
     modalBody.innerHTML = `
       <div class="modal-image">
@@ -272,27 +250,18 @@
         <div class="modal-spec-item"><span class="modal-spec-label">Curtidas</span><span class="modal-spec-value" id="modalLikeCount">${likeCount}</span></div>
       </div>
       <div class="modal-actions">
-        <button class="modal-desc-btn" id="modalDescBtn">
-          <span>📄</span> Descrição
-        </button>
+        <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de informações sobre a joia ${product.code} - ${product.name}" class="modal-whatsapp-btn" target="_blank">
+          <span>💬</span> Consultar no WhatsApp
+        </a>
         <button class="modal-like-btn" id="modalLikeBtn" data-product-id="${product.id}">
           <span class="like-icon">❤️</span> Curtir
         </button>
-      </div>
-      <div class="modal-description" id="modalDescription">
-        <p>${description}</p>
       </div>
     `;
     
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     
-    // Handler para descrição no modal
-    document.getElementById('modalDescBtn').addEventListener('click', () => {
-      const descDiv = document.getElementById('modalDescription');
-      descDiv.classList.toggle('visible');
-    });
-
     document.getElementById('modalLikeBtn').addEventListener('click', async (e) => {
       const btn = e.currentTarget;
       const id = btn.dataset.productId;
@@ -310,14 +279,106 @@
     });
 
     const modalImg = document.getElementById('modalProductImage');
-    modalImg.addEventListener('click', () => {
-      modalImg.style.transform = modalImg.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
-    });
+    if (modalImg) {
+      modalImg.addEventListener('click', () => {
+        modalImg.style.transform = modalImg.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
+      });
+    }
   }
 
   function closeModal() {
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
+  }
+
+  /* ---------- MODAL DE ARTISTA ---------- */
+  const artistData = {
+    fernando: {
+      name: 'Fernando Dark',
+      role: 'Tatuador & Body Piercer · Proprietário',
+      avatar: 'https://i.ibb.co/v6hzMpNV/IMG-20250817-171554-861.jpg',
+      bio: 'Fernando Dark é o fundador da DARK013TATTOO, com anos de experiência em tatuagens customizadas e piercings de alta precisão. Especializado em traços ousados, realismo e cobertura de cicatrizes, preza pela segurança e utilização de materiais de grau cirúrgico (ASTM F-136) em todos os procedimentos. Atendimento exclusivo com hora marcada, garantindo atenção total a cada cliente.',
+      specialties: ['Realismo', 'tattoos delicadas ', 'Traços Bold', 'Piercings'],
+      whatsapp: 'https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de agendar um serviço na DARK013TATTOO'
+    },
+    thalia: {
+      name: 'Thalia',
+      role: 'Tatuadora · Especialista em Traços Finos',
+      avatar: 'https://i.ibb.co/wF5kfM6M/IMG-20260426-WA0000.jpg',
+      bio: 'Thalia é a artista delicada do estúdio, apaixonada por tatuagens finas, lettering e desenhos minimalistas. Seu traço suave e preciso transforma ideias em arte sobre a pele, sempre com foco no conforto e acolhimento. Ela acredita que cada tattoo é uma experiência única, e por isso dedica tempo para entender o significado de cada projeto antes de criá-lo.',
+      specialties: ['Traços Finos', 'Lettering', 'Minimalismo', 'Aquarela'],
+      whatsapp: 'https://wa.me/message/2NCM2O7J7ECRN1?text=Olá! Gostaria de agendar um serviço com a Thalia'
+    }
+  };
+
+  function openArtistModal(artistKey) {
+    const artist = artistData[artistKey];
+    if (!artist || !artistModal || !artistModalBody) return;
+
+    const tagsHtml = artist.specialties.map(s => `<span class="artist-profile__tag">${s}</span>`).join('');
+
+    artistModalBody.innerHTML = `
+      <div class="artist-profile">
+        <div class="artist-profile__header">
+          <img src="${artist.avatar}" alt="${artist.name}" class="artist-profile__avatar">
+          <div>
+            <div class="artist-profile__name">${artist.name}</div>
+            <div class="artist-profile__role">${artist.role}</div>
+          </div>
+        </div>
+        <div class="artist-profile__bio">
+          ${artist.bio}
+        </div>
+        <div class="artist-profile__specialties">
+          ${tagsHtml}
+        </div>
+        <div class="artist-profile__contact">
+          <a href="${artist.whatsapp}" class="modal-whatsapp-btn" target="_blank">
+            <span>💬</span> Agendar com ${artist.name.split(' ')[0]}
+          </a>
+          <button class="modal-like-btn" id="closeArtistModalBtn">
+            Fechar
+          </button>
+        </div>
+      </div>
+    `;
+
+    artistModal.classList.add('active');
+    artistModal.setAttribute('aria-hidden', 'false');
+
+    const closeBtn = document.getElementById('closeArtistModalBtn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeArtistModal);
+    }
+  }
+
+  function closeArtistModal() {
+    if (!artistModal) return;
+    artistModal.classList.remove('active');
+    artistModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function initArtistModal() {
+    if (!artistModal || !artistModalClose || !artistModalOverlay) return;
+    
+    artistModalClose.addEventListener('click', closeArtistModal);
+    artistModalOverlay.addEventListener('click', closeArtistModal);
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && artistModal.classList.contains('active')) {
+        closeArtistModal();
+      }
+    });
+
+    // Listener para os botões "Conheça o Artista" nos banners
+    document.querySelectorAll('.promo-banner__desc-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const artistKey = btn.dataset.artist;
+        if (artistKey) openArtistModal(artistKey);
+      });
+    });
   }
 
   /* ---------- LIKES ---------- */
@@ -374,16 +435,6 @@
       showToast(result.action === 'added' ? '❤️ Curtiu!' : '💔 Curtida removida');
     }
     button.disabled = false;
-  }
-
-  function handleDescClick(e) {
-    e.stopPropagation();
-    const button = e.currentTarget;
-    const productId = button.dataset.productId;
-    const descDiv = document.getElementById(`desc-${productId}`);
-    if (descDiv) {
-      descDiv.classList.toggle('visible');
-    }
   }
 
   /* ---------- DADOS ---------- */
@@ -515,36 +566,9 @@
   function initModal() {
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', closeModal);
-
-    const artistModal = document.getElementById('artistModal');
-    const artistClose = artistModal.querySelector('.modal-close');
-    const artistOverlay = artistModal.querySelector('.modal-overlay');
-
-    function openArtistModal() {
-      artistModal.classList.add('active');
-      artistModal.setAttribute('aria-hidden', 'false');
-    }
-    function closeArtistModal() {
-      artistModal.classList.remove('active');
-      artistModal.setAttribute('aria-hidden', 'true');
-    }
-
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (modal.classList.contains('active')) closeModal();
-        if (artistModal.classList.contains('active')) closeArtistModal();
-      }
+      if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
     });
-
-    document.body.addEventListener('click', (e) => {
-      if (e.target.closest('.artist-modal-trigger')) {
-        e.preventDefault();
-        openArtistModal();
-      }
-    });
-
-    artistClose.addEventListener('click', closeArtistModal);
-    artistOverlay.addEventListener('click', closeArtistModal);
   }
 
   function initPromoCarousel() {
@@ -672,6 +696,7 @@
     initModal();
     initPromoCarousel();
     initRadioPlayer();
+    initArtistModal();
   });
 
 })();

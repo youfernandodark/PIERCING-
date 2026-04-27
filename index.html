@@ -49,18 +49,13 @@
     </div>
   </div>
 
-  <!-- Modal do Artista -->
+  <!-- Modal de descrição do artista -->
   <div id="artistModal" class="modal" aria-hidden="true">
     <div class="modal-overlay"></div>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="artistModalTitle">
-      <button class="modal-close" aria-label="Fechar modal">&times;</button>
-      <div class="modal-body">
-        <h2 id="artistModalTitle" style="font-size:1.8rem; margin-bottom:16px; color:#f0f0f0;">Fernando Dark</h2>
-        <p style="font-size:1rem; line-height:1.7; color:#d0d0d0; white-space:pre-line;">
-          Fernando Dark sou tatuador, desenhista e skatista, gosto de cozinhar, anime, kpop, rock e da cultura asiática. Não sou de muitas amizades, mas sou gente boa, amo as coisas que faço.
-          Todos os dias acordo com o objetivo de ser melhor pra mim e para as pessoas que amo.
-          Obrigado a todos que curtem meu trabalho 😍
-        </p>
+    <div class="modal-content artist-modal-content" role="dialog" aria-modal="true" aria-labelledby="artistModalTitle">
+      <button class="modal-close artist-modal-close" aria-label="Fechar modal">&times;</button>
+      <div class="modal-body" id="artistModalBody">
+        <!-- Conteúdo dinâmico -->
       </div>
     </div>
   </div>
@@ -159,18 +154,43 @@
             </div>
           </div>
         </div>
-        <!-- Slide 4: Banner do Tatuador -->
+        <!-- Slide 4: Banner do Fernando Dark -->
         <div class="promo-slide">
-          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/gLdgcN0m/IMG-20250817-171554-861.jpg');">
+          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/v6hzMpNV/IMG-20250817-171554-861.jpg');">
             <div class="promo-banner__overlay">
               <div class="promo-banner__content">
                 <div class="promo-banner__text">
                   <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça o artista</span>
-                  <h2 class="promo-banner__title promo-banner__title--artist">Fernando Dark</h2>
+                  <h2 class="promo-banner__title promo-banner__title--artist">DARK013TATTOO</h2>
                   <p class="promo-banner__subtitle promo-banner__subtitle--artist">Agende nossos serviços</p>
-                  <div class="modal-actions" style="flex-direction: column; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="promo-banner__cta artist-modal-trigger" style="background: #1a1a1a; border-color: #4a4a4a;">
-                     ✅ Descrição clica aqui
+                  <div class="promo-banner__actions">
+                    <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de agendar um serviço na DARK013TATTOO" class="promo-banner__cta" target="_blank">
+                      <span>💬</span> Chamar no WhatsApp
+                    </a>
+                    <button class="promo-banner__desc-btn" data-artist="fernando" aria-label="Ver descrição do Fernando Dark">
+                      <span>📋</span> Conheça o Artista
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Slide 5: Banner da Thalia -->
+        <div class="promo-slide">
+          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/wF5kfM6M/IMG-20260426-WA0000.jpg');">
+            <div class="promo-banner__overlay">
+              <div class="promo-banner__content">
+                <div class="promo-banner__text">
+                  <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça a artista</span>
+                  <h2 class="promo-banner__title promo-banner__title--artist">Thalia</h2>com 
+                  <p class="promo-banner__subtitle promo-banner__subtitle--artist">Agende nossos serviços</p>
+                  <div class="promo-banner__actions">
+                    <a href="https://wa.me/message/2NCM2O7J7ECRN1?text=Olá! Gostaria de agendar um serviço com a Thalia" class="promo-banner__cta" target="_blank">
+                      <span>💬</span> Chamar no WhatsApp
+                    </a>
+                    <button class="promo-banner__desc-btn" data-artist="thalia" aria-label="Ver descrição da Thalia">
+                      <span>📋</span> Conheça a Artista
                     </button>
                   </div>
                 </div>
@@ -185,6 +205,7 @@
         <span class="indicator" data-slide="2"></span>
         <span class="indicator" data-slide="3"></span>
         <span class="indicator" data-slide="4"></span>
+        <span class="indicator" data-slide="5"></span>
       </div>
     </div>
 
