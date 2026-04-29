@@ -1,282 +1,276 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <meta name="description" content="Catálogo de joias em titânio ASTM F-136 da DARK013TATTOO. Consulte disponibilidade.">
-  
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-S6KZL47FHY"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-S6KZL47FHY');
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Catálogo de joias em titânio ASTM F-136 da DARK013TATTOO. Consulte disponibilidade.">
 
-  <!-- Open Graph / Social -->
-  <meta property="og:title" content="DARK013TATTOO · Catálogo de Joias em Titânio">
-  <meta property="og:description" content="Joias hipoalergênicas ASTM F-136. Consulte disponibilidade.">
-  <meta property="og:image" content="https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  
-  <title>DARK013TATTOO · Catálogo de Joias em Titânio</title>
-  
-  <!-- Fonte Google -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-  
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Estilos principais -->
-  <link rel="stylesheet" href="style.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a0a0a' stroke='%237a7a7a' stroke-width='2'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='central' text-anchor='middle' font-size='38'%3E💎%3C/text%3E%3C/svg%3E">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S6KZL47FHY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-S6KZL47FHY');
+    </script>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="DARK013TATTOO · Catálogo de Joias em Titânio">
+    <meta property="og:description" content="Joias hipoalergênicas ASTM F-136. Consulte disponibilidade.">
+    <meta property="og:image" content="https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <title>DARK013TATTOO · Catálogo de Joias em Titânio</title>
+
+    <!-- Fonte Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"></noscript>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Toast container para notificações -->
-  <div id="toastContainer" class="toast-container"></div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" role="status"></div>
 
-  <!-- Modal de detalhes do produto -->
-  <div id="productModal" class="modal" aria-hidden="true">
-    <div class="modal-overlay"></div>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button class="modal-close" aria-label="Fechar modal">&times;</button>
-      <div class="modal-body" id="modalBody">
-        <!-- Conteúdo dinâmico -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de descrição do artista -->
-  <div id="artistModal" class="modal" aria-hidden="true">
-    <div class="modal-overlay"></div>
-    <div class="modal-content artist-modal-content" role="dialog" aria-modal="true" aria-labelledby="artistModalTitle">
-      <button class="modal-close artist-modal-close" aria-label="Fechar modal">&times;</button>
-      <div class="modal-body" id="artistModalBody">
-        <!-- Conteúdo dinâmico -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Barra de anúncio deslizante (marquee) -->
-  <div class="top-marquee">
-    <div class="marquee-content">
-      <span>💎 Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada 💎</span>
-      <span>💎 Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada 💎</span>
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- Carrossel de banners promocionais -->
-    <div class="promo-carousel">
-      <div class="promo-slides">
-        <!-- Slide 0: Promoção de Inverno -->
-        <div class="promo-slide">
-          <div class="promo-banner">
-            <div class="promo-banner__content">
-              <div class="promo-banner__text">
-                <span class="promo-banner__badge">🔥 Promoção de Inverno</span>
-                <h2 class="promo-banner__title">Tatuagens acima de 300 reais <span>20% OFF</span></h2>
-                <p class="promo-banner__subtitle">Agende sua tattoo até 30/05 e garanta o desconto</p>
-                <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank">
-                  <span>💬</span> Agendar via WhatsApp
-                </a>
-              </div>
-              <div class="promo-banner__visual">
-                <span class="promo-banner__icon">⚡</span>
-                <span class="promo-banner__icon">🎨</span>
-                <span class="promo-banner__icon">🖤</span>
-              </div>
-            </div>
-          </div>
+    <!-- Modal de Produto -->
+    <div id="productModal" class="modal" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-content--product" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal-close" aria-label="Fechar modal">&times;</button>
+            <div class="modal-body" id="modalBody"></div>
         </div>
-        <!-- Slide 1: Oferta Especial -->
-        <div class="promo-slide">
-          <div class="promo-banner promo-banner--alt">
-            <div class="promo-banner__content">
-              <div class="promo-banner__text">
-                <span class="promo-banner__badge promo-banner__badge--alt">🌸 Oferta Especial</span>
-                <h2 class="promo-banner__title">3 Tattoos <span>Delicadas</span></h2>
-                <p class="promo-banner__subtitle">Por apenas <strong>R$150</strong> · Válido até o final do mês</p>
-                <p class="promo-banner__note">Consulte disponibilidade de horários</p>
-              </div>
-              <div class="promo-banner__visual">
-                <span class="promo-banner__icon">🌸</span>
-                <span class="promo-banner__icon">✨</span>
-                <span class="promo-banner__icon">🦋</span>
-              </div>
-            </div>
-          </div>
+    </div>
+
+    <!-- Modal de Artista -->
+    <div id="artistModal" class="modal" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-content--artist" role="dialog" aria-modal="true" aria-labelledby="artistModalTitle">
+            <button class="modal-close artist-modal-close" aria-label="Fechar modal">&times;</button>
+            <div class="modal-body" id="artistModalBody"></div>
         </div>
-        <!-- Slide 2: Promoção de Perfuração -->
-        <div class="promo-slide">
-          <div class="promo-banner promo-banner--alt">
-            <div class="promo-banner__content">
-              <div class="promo-banner__text">
-                <span class="promo-banner__badge promo-banner__badge--alt">💎 Promoção de Perfuração</span>
-                <h2 class="promo-banner__title">Furo + Joia <span>em Titânio</span></h2>
-                <div class="promo-banner__offers">
-                  <p class="promo-banner__subtitle">📍 Umbigo: <strong>R$65</strong> (joia inclusa)</p>
-                  <p class="promo-banner__subtitle">📍 Demais locais: <strong>R$50</strong> (joia inclusa)</p>
+    </div>
+
+    <!-- Marquee -->
+    <div class="top-marquee">
+        <div class="marquee-track">
+            <span>💎 Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada 💎</span>
+            <span aria-hidden="true">💎 Joias em Titânio ASTM F-136 · Esterilizadas · Hipoalergênicas · Atendimento com Hora Marcada 💎</span>
+        </div>
+    </div>
+
+    <main class="container">
+        <!-- Carrossel de Banners -->
+        <section class="promo-carousel" aria-roledescription="carousel" aria-label="Promoções e destaques">
+            <div class="promo-slides" aria-live="polite">
+                <!-- Slide 0 -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--fire">
+                        <div class="promo-banner__content">
+                            <div class="promo-banner__text">
+                                <span class="promo-banner__badge">🔥 Promoção de Inverno</span>
+                                <h2 class="promo-banner__title">Tatuagens acima de R$300 com <span>20% OFF</span></h2>                                
+                                <p class="promo-banner__subtitle">Agende até 30/05 e garanta o desconto</p>
+                                <p class="promo-banner__subtitle">para ganhar o desconto, terá que pagar 50% do valor da tattoo.</p>
+                                <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank" rel="noopener noreferrer">
+                                    💬 Agendar via WhatsApp
+                                </a>
+                            </div>
+                            <div class="promo-banner__visual" aria-hidden="true">
+                                <span class="promo-banner__emoji">⚡</span>
+                                <span class="promo-banner__emoji">🎨</span>
+                                <span class="promo-banner__emoji">🖤</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="promo-banner__note">Consulte disponibilidade de horários</p>
-              </div>
-              <div class="promo-banner__visual">
-                <span class="promo-banner__icon">💎</span>
-                <span class="promo-banner__icon">✨</span>
-                <span class="promo-banner__icon">⚕️</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Slide 3: Combo progressivo -->
-        <div class="promo-slide">
-          <div class="promo-banner promo-banner--progress">
-            <div class="promo-banner__content">
-              <div class="promo-banner__text">
-                <span class="promo-banner__badge promo-banner__badge--progress">📈 Ganhe descontos nas perfurações </span>
-                <h2 class="promo-banner__title">
-                  1 joia = <span>10%</span> | 2 joias = <span>10%</span> | 3+ joias = <span>15% OFF</span>
-                </h2>
-                <p class="promo-banner__subtitle">Válido para todo o catálogo.</p>
-                <p class="promo-banner__note">Promoção válida até 15/05</p>
-                <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank">
-                  <span>🛒</span> Montar meu combo
-                </a>
-              </div>
-              <div class="promo-banner__visual">
-                <span class="promo-banner__icon">🔢</span>
-                <span class="promo-banner__icon">📊</span>
-                <span class="promo-banner__icon">💸</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Slide 4: Banner do Fernando Dark -->
-        <div class="promo-slide">
-          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/v6hzMpNV/IMG-20250817-171554-861.jpg');">
-            <div class="promo-banner__overlay">
-              <div class="promo-banner__content">
-                <div class="promo-banner__text">
-                  <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça o artista</span>
-                  <h2 class="promo-banner__title promo-banner__title--artist">Fernando Dark</h2>
-                  <p class="promo-banner__subtitle promo-banner__subtitle--artist">Agende nossos serviços</p>
-                  <div class="promo-banner__actions">
-                    <a href="https://wa.me/message/FLSHGYBYY47GE1?text=Olá! Gostaria de agendar um serviço na DARK013TATTOO" class="promo-banner__cta" target="_blank">
-                      <span>💬</span> Chamar no WhatsApp
-                    </a>
-                    <button class="promo-banner__desc-btn" data-artist="fernando" aria-label="Ver descrição do Fernando Dark">
-                      <span>📋</span> Conheça o Artista
-                    </button>
-                  </div>
+                <!-- Slide 1 -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--mother">
+                        <div class="promo-banner__content">
+                            <div class="promo-banner__text">
+                                <span class="promo-banner__badge">🌸 Dia das Mães</span>
+                                <h2 class="promo-banner__title">Tattoo acima de <span>R$150</span></h2>
+                                <p class="promo-banner__subtitle"><strong>Ganhe uma minimalista de brinde!</strong></p>
+                                <p class="promo-banner__note">Presenteie quem você ama 💝 · Válido até 10/05</p>
+                            </div>
+                            <div class="promo-banner__visual" aria-hidden="true">
+                                <span class="promo-banner__emoji">🎁</span>
+                                <span class="promo-banner__emoji">💝</span>
+                                <span class="promo-banner__emoji">🌸</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Slide 5: Banner da Thalia -->
-        <div class="promo-slide">
-          <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/wF5kfM6M/IMG-20260426-WA0000.jpg');">
-            <div class="promo-banner__overlay">
-              <div class="promo-banner__content">
-                <div class="promo-banner__text">
-                  <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça a artista</span>
-                  <h2 class="promo-banner__title promo-banner__title--artist">Thalia</h2>com 
-                  <p class="promo-banner__subtitle promo-banner__subtitle--artist">Agende nossos serviços</p>
-                  <div class="promo-banner__actions">
-                    <a href="https://wa.me/message/2NCM2O7J7ECRN1?text=Olá! Gostaria de agendar um serviço com a Thalia" class="promo-banner__cta" target="_blank">
-                      <span>💬</span> Chamar no WhatsApp
-                    </a>
-                    <button class="promo-banner__desc-btn" data-artist="thalia" aria-label="Ver descrição da Thalia">
-                      <span>📋</span> Conheça a Artista
-                    </button>
-                  </div>
+                <!-- Slide 2 -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--pierce">
+                        <div class="promo-banner__content">
+                            <div class="promo-banner__text">
+                                <span class="promo-banner__badge">💎 Promoção de Perfuração</span>
+                                <h2 class="promo-banner__title">Furo + Joia <span>em Titânio</span></h2>
+                                <p class="promo-banner__subtitle">📍 Umbigo: <strong>R$65</strong> (joia inclusa)</p>
+                                <p class="promo-banner__subtitle">📍 Demais locais: <strong>R$50</strong> (joia inclusa)</p>
+                                <p class="promo-banner__note">Consulte horários disponíveis</p>
+                            </div>
+                            <div class="promo-banner__visual" aria-hidden="true">
+                                <span class="promo-banner__emoji">💎</span>
+                                <span class="promo-banner__emoji">✨</span>
+                                <span class="promo-banner__emoji">⚕️</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+                <!-- Slide 3 -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--progress">
+                        <div class="promo-banner__content">
+                            <div class="promo-banner__text">
+                                <span class="promo-banner__badge">📈 Combo Progressivo</span>
+                                <h2 class="promo-banner__title">1 joia = <span>10%</span> | 2 joias = <span>10%</span> | 3+ = <span>15% OFF</span></h2>
+                                <p class="promo-banner__subtitle">Válido para todo o catálogo até 15/05</p>
+                                <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank" rel="noopener noreferrer">
+                                    🛒 Montar meu combo
+                                </a>
+                            </div>
+                            <div class="promo-banner__visual" aria-hidden="true">
+                                <span class="promo-banner__emoji">🔢</span>
+                                <span class="promo-banner__emoji">📊</span>
+                                <span class="promo-banner__emoji">💸</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 4 - Fernando -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/v6hzMpNV/IMG-20250817-171554-861.jpg');">
+                        <div class="promo-banner__overlay">
+                            <div class="promo-banner__content">
+                                <div class="promo-banner__text">
+                                    <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça o artista</span>
+                                    <h2 class="promo-banner__title promo-banner__title--artist">Fernando Dark</h2>
+                                    <p class="promo-banner__subtitle promo-banner__subtitle--artist">Tatuagens customizadas & piercings de precisão</p>
+                                    <div class="promo-banner__actions">
+                                        <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank" rel="noopener noreferrer">💬 Agendar</a>
+                                        <button class="promo-banner__desc-btn" data-artist="fernando">📋 Conheça o Artista</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 5 - Thalia -->
+                <div class="promo-slide">
+                    <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/wF5kfM6M/IMG-20260426-WA0000.jpg');">
+                        <div class="promo-banner__overlay">
+                            <div class="promo-banner__content">
+                                <div class="promo-banner__text">
+                                    <span class="promo-banner__badge promo-banner__badge--artist">⚡ Conheça a artista</span>
+                                    <h2 class="promo-banner__title promo-banner__title--artist">Thalia</h2>
+                                    <p class="promo-banner__subtitle promo-banner__subtitle--artist">Especialista em traços finos & minimalismo</p>
+                                    <div class="promo-banner__actions">
+                                        <a href="https://wa.me/message/2NCM2O7J7ECRN1" class="promo-banner__cta" target="_blank" rel="noopener noreferrer">💬 Agendar</a>
+                                        <button class="promo-banner__desc-btn" data-artist="thalia">📋 Conheça a Artista</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+            <div class="carousel-indicators">
+                <span class="indicator active" data-slide="0" tabindex="0" role="button" aria-label="Slide 1"></span>
+                <span class="indicator" data-slide="1" tabindex="0" role="button" aria-label="Slide 2"></span>
+                <span class="indicator" data-slide="2" tabindex="0" role="button" aria-label="Slide 3"></span>
+                <span class="indicator" data-slide="3" tabindex="0" role="button" aria-label="Slide 4"></span>
+                <span class="indicator" data-slide="4" tabindex="0" role="button" aria-label="Slide 5"></span>
+                <span class="indicator" data-slide="5" tabindex="0" role="button" aria-label="Slide 6"></span>
+            </div>
+            <button class="carousel-pause-btn" aria-label="Pausar carrossel">⏸️</button>
+        </section>
+
+        <!-- Header -->
+        <header class="studio-header">
+            <div class="header-left">
+                <h1 class="studio-name">
+                    <span class="header-icon" aria-hidden="true">💎</span>
+                    DARK013TATTOO
+                    <span class="header-icon" aria-hidden="true">💎</span>
+                </h1>
+                <p class="studio-subtitle">Tatuagens & Piercings</p>
+                <span class="badge">✨ Joias em Titânio ✨</span>
+            </div>
+            <div class="header-right">
+                <span class="material-grade">ASTM F-136</span>
+                <span class="model-count" id="modelCountDisplay">…</span>
+                <span class="header-tagline">Grau Cirúrgico · BioCompatível</span>
+                <div class="view-counter" id="viewCounterDisplay">
+                    <span class="view-icon" aria-hidden="true">👁️</span>
+                    <span id="viewCountValue">…</span> visualizações
+                </div>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Buscar por código ou nome..." aria-label="Buscar produtos">
+                <button id="clearSearch" class="clear-search-btn" aria-label="Limpar busca" style="display:none;">✕</button>
+            </div>
+            <div class="filter-options">
+                <select id="sortSelect" aria-label="Ordenar produtos">
+                    <option value="default">Ordenar por</option>
+                    <option value="name">Nome A-Z</option>
+                    <option value="name-desc">Nome Z-A</option>
+                    <option value="likes">Mais curtidos</option>
+                    <option value="availability">Disponíveis primeiro</option>
+                </select>
+                <button id="filterAvailableBtn" class="filter-btn" aria-pressed="false">📦 Em estoque</button>
+            </div>
         </div>
-      </div>
-      <div class="carousel-indicators">
-        <span class="indicator active" data-slide="0"></span>
-        <span class="indicator" data-slide="1"></span>
-        <span class="indicator" data-slide="2"></span>
-        <span class="indicator" data-slide="3"></span>
-        <span class="indicator" data-slide="4"></span>
-        <span class="indicator" data-slide="5"></span>
-      </div>
-    </div>
 
-    <header class="studio-header">
-      <div class="header-left">
-        <div class="studio-name">
-          <span class="header-icon">💎</span>
-          DARK013TATTOO
-          <span class="header-icon">💎</span>
+        <!-- Título da seção -->
+        <div class="catalog-title">
+            Catálogo de Joias <span></span>
         </div>
-        <div class="studio-subtitle">Tatuagens & Piercings</div>
-        <div class="badge">✨ Joias em Titânio ✨</div>
-      </div>
-      <div class="header-right">
-        <span class="material-grade">ASTM F-136</span>
-        <span class="model-count" id="modelCountDisplay">…</span>
-        <span class="header-tagline">Grau Cirúrgico · BioCompatível</span>
-        <div class="view-counter" id="viewCounterDisplay">
-          <span class="view-icon">👁️</span>
-          <span id="viewCountValue">…</span> visualizações
+
+        <!-- Grid de Produtos -->
+        <div id="productContainer" class="product-grid"></div>
+
+        <!-- Footer -->
+        <footer class="footer-note">
+            <p>DARK013TATTOO</p>
+            <p>Consulte disponibilidade de medidas · Tattoo & Piercing</p>
+            <p class="developer-credit">Aplicação desenvolvida por Fernando Dark | 2026</p>
+        </footer>
+    </main>
+
+    <!-- Rádio Player -->
+    <div class="radio-player" id="radioPlayer">
+        <div class="radio-controls">
+            <button class="radio-play-btn" id="radioPlayBtn" aria-label="Tocar rádio">▶</button>
+            <div class="radio-info">
+                <span class="radio-icon" aria-hidden="true">📻</span>
+                <span class="radio-label" id="radioStationName">Hunter FM K-pop</span>
+            </div>
+            <div class="radio-volume">
+                <button id="radioMuteBtn" class="radio-mute-btn" aria-label="Alternar mudo">🔊</button>
+                <input type="range" id="radioVolume" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
+            </div>
         </div>
-      </div>
-    </header>
-
-    <!-- Barra de busca e filtros -->
-    <div class="filter-bar">
-      <div class="search-wrapper">
-        <input type="text" id="searchInput" placeholder="Buscar por código ou nome..." aria-label="Buscar produtos">
-        <button id="clearSearch" aria-label="Limpar busca" style="display:none;">✕</button>
-      </div>
-      <div class="filter-options">
-        <select id="sortSelect" aria-label="Ordenar produtos">
-          <option value="default">Ordenar por</option>
-          <option value="name">Nome A-Z</option>
-          <option value="name-desc">Nome Z-A</option>
-          <option value="likes">Mais curtidos</option>
-          <option value="availability">Disponíveis primeiro</option>
-        </select>
-        <button id="filterAvailableBtn" class="filter-btn" aria-pressed="false">📦 Em estoque</button>
-      </div>
+        <audio id="radioAudio" preload="none"></audio>
     </div>
 
-    <div class="catalog-title">
-      Catálogo de Joias <span></span>
-    </div>
-
-    <div id="productContainer" class="product-grid"></div>
-
-    <footer class="footer-note">
-      DARK013TATTOO <br>
-      Consulte disponibilidade de medidas · Tattoo & Piercing
-      <div class="developer-credit">Aplicação desenvolvida por Fernando Dark | 2026</div>
-    </footer>
-  </div>
-
-  <!-- Player de Rádio Flutuante -->
-  <div class="radio-player" id="radioPlayer">
-    <div class="radio-controls">
-      <button class="radio-play-btn" id="radioPlayBtn" aria-label="Tocar rádio">▶</button>
-      <div class="radio-info">
-        <span class="radio-icon">📻</span>
-        <span class="radio-label" id="radioStationName">Hunter FM K-pop</span>
-      </div>
-      <div class="radio-volume">
-        <button id="radioMuteBtn" class="radio-mute-btn" aria-label="Alternar mudo">🔊</button>
-        <input type="range" id="radioVolume" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
-      </div>
-    </div>
-    <audio id="radioAudio" preload="auto"></audio>
-  </div>
-
-  <script src="script.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
