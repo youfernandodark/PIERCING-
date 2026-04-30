@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="description" content="Catálogo de joias em titânio ASTM F-136 da DARK013TATTOO. Consulte disponibilidade.">
 
+    <!-- ===== PWA / APP MOBILE ===== -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DARK013">
+    <meta name="theme-color" content="#080808">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <!-- ========================== -->
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230a0a0a' stroke='%237a7a7a' stroke-width='2'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='central' text-anchor='middle' font-size='38'%3E💎%3C/text%3E%3C/svg%3E">
 
@@ -100,9 +109,10 @@
                         <div class="promo-banner__content">
                             <div class="promo-banner__text">
                                 <span class="promo-banner__badge">🌸 Dia das Mães</span>
-                                <h2 class="promo-banner__title">Tattoo acima de <span>R$150</span></h2>
+                                <h2 class="promo-banner__title">Fazendo 1 Tattoo acima de <span>R$150</span></h2>
                                 <p class="promo-banner__subtitle"><strong>Ganhe uma minimalista de brinde!</strong></p>
                                 <p class="promo-banner__note">Presenteie quem você ama 💝 · Válido até 10/05</p>
+                                <p class="promo-banner__note">Para ganhar o brinde, tem que pagar 50% valor na hora de agendar a tattoo.</p>
                             </div>
                             <div class="promo-banner__visual" aria-hidden="true">
                                 <span class="promo-banner__emoji">🎁</span>
@@ -269,6 +279,27 @@
             </div>
         </div>
         <audio id="radioAudio" preload="none"></audio>
+    </div>
+
+    <!-- ========== BOTTOM NAVIGATION (APP MOBILE) ========== -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="bottom-nav__item active" data-tab="home" aria-label="Início">
+            <span class="bottom-nav__icon">🏠</span>
+            <span class="bottom-nav__label">Início</span>
+        </button>
+        <button class="bottom-nav__item" data-tab="catalog" aria-label="Catálogo">
+            <span class="bottom-nav__icon">💎</span>
+            <span class="bottom-nav__label">Catálogo</span>
+        </button>
+        <button class="bottom-nav__item" data-tab="contact" aria-label="Contato">
+            <span class="bottom-nav__icon">💬</span>
+            <span class="bottom-nav__label">Contato</span>
+        </button>
+    </nav>
+
+    <!-- Pull-to-refresh indicator -->
+    <div class="ptr-indicator" id="ptrIndicator">
+        <span class="ptr-spinner"></span>
     </div>
 
     <script src="script.js" defer></script>
