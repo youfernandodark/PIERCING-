@@ -27,6 +27,8 @@
 
     /* ========== ELEMENTOS DOM ========== */
     const container = document.getElementById('productContainer');
+    const featuredSection = document.getElementById('featuredSection');
+    const featuredContainer = document.getElementById('featuredContainer');
     const modelCountDisplay = document.getElementById('modelCountDisplay');
     const viewCountValue = document.getElementById('viewCountValue');
     const searchInput = document.getElementById('searchInput');
@@ -77,9 +79,7 @@
         };
         try {
             localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-        } catch (e) {
-            // localStorage cheio
-        }
+        } catch (e) {}
     }
 
     function loadFromCache() {
@@ -94,13 +94,11 @@
                     userLikes: new Set(data.userLikes || [])
                 };
             }
-        } catch (e) {
-            // Cache inválido
-        }
+        } catch (e) {}
         return null;
     }
 
-    /* ========== FILTRAGEM E ORDENAÇÃO ========== */
+    /* ========== FILTRAGEM E ORDENAÇÃO (retorna objeto com featured e rest) ========== */
     function filterAndSortProducts() {
         let filtered = [...allProducts];
 
@@ -134,7 +132,12 @@
                 });
                 break;
         }
-        return filtered;
+
+        return {
+            all: filtered,
+            featured: filtered.filter(p => p.featured),
+            rest: filtered.filter(p => !p.featured)
+        };
     }
 
     function updateFilterUI() {
@@ -142,7 +145,7 @@
         filterAvailableBtn.setAttribute('aria-pressed', currentFilter.onlyAvailable);
     }
 
-    /* ========== CRIA HTML DO CARD (COMPONENTIZADO) ========== */
+    /* ========== CRIA HTML DO CARD DO CATÁLOGO (COMPLETO) ========== */
     function createCardHTML(product, likeCount, userLiked) {
         const thickness = product.thickness || '—';
         const postLength = product.post_length_options || '—';
@@ -196,23 +199,71 @@
         `;
     }
 
-    /* ========== RENDERIZAÇÃO DE PRODUTOS ========== */
-    function renderProducts() {
-        const filtered = filterAndSortProducts();
+    /* ========== CRIA HTML SIMPLES PARA CARROSSEL DE DESTAQUES (APENAS IMAGEM + NOME) ========== */
+    function createFeaturedCardHTML(product) {
+        return `
+            <div class="featured-card" data-product-id="${product.id}" role="button" tabindex="0">
+                <div class="featured-card__image">
+                    <img src="${product.image_url}" alt="${product.name}" loading="lazy"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect fill=%27%23181818%27 width=%27300%27 height=%27300%27/%3E%3Ctext x=%2750%27 y=%2755%27 font-family=%27sans-serif%27 font-size=%2714%27 fill=%27%23666%27 text-anchor=%27middle%27%3E📷%3C/text%3E%3C/svg%3E'">
+                    <div class="featured-card__name">${product.name}</div>
+                </div>
+                <span class="featured-card__badge">Destaque</span>
+            </div>
+        `;
+    }
 
-        if (!filtered.length) {
+    /* ========== RENDERIZAÇÃO DE PRODUTOS (DESTAQUES EM CARROSSEL + CATÁLOGO) ========== */
+    function renderProducts() {
+        const { featured, rest } = filterAndSortProducts();
+        const totalItems = featured.length + rest.length;
+
+        modelCountDisplay.textContent = `${totalItems} modelo${totalItems !== 1 ? 's' : ''}`;
+
+        // Seção de destaques (carrossel)
+        if (featured.length > 0) {
+            featuredSection.style.display = 'block';
+            featuredContainer.innerHTML = featured.map(prod => createFeaturedCardHTML(prod)).join('');
+            // Attach eventos de clique para abrir modal
+            featuredContainer.querySelectorAll('.featured-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const id = card.dataset.productId;
+                    const product = allProducts.find(p => p.id == id);
+                    if (product) openModal(product);
+                });
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        card.click();
+                    }
+                });
+            });
+        } else {
+            featuredSection.style.display = 'none';
+        }
+
+        // Grid principal (rest)
+        if (totalItems === 0) {
             container.innerHTML = '<div class="error-msg">Nenhum produto encontrado.</div>';
-            modelCountDisplay.textContent = '0 modelos';
             return;
         }
 
-        modelCountDisplay.textContent = `${filtered.length} modelo${filtered.length !== 1 ? 's' : ''}`;
+        if (rest.length === 0) {
+            container.innerHTML = featured.length > 0
+                ? '<p class="info-msg">Todos os produtos encontrados estão em destaque acima.</p>'
+                : '<div class="error-msg">Nenhum produto encontrado.</div>';
+            return;
+        }
 
-        const html = filtered.map(prod => createCardHTML(prod, likesMap[prod.id] || 0, userLikes.has(prod.id))).join('');
-        container.innerHTML = html;
+        container.innerHTML = rest.map(prod =>
+            createCardHTML(prod, likesMap[prod.id] || 0, userLikes.has(prod.id))
+        ).join('');
 
-        // Delegação de clique e teclado
-        container.querySelectorAll('.product-card').forEach(card => {
+        attachGridEvents(container);
+    }
+
+    function attachGridEvents(containerElement) {
+        containerElement.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.like-button')) return;
                 const id = card.dataset.productId;
@@ -227,7 +278,7 @@
             });
         });
 
-        container.querySelectorAll('.like-button').forEach(btn => {
+        containerElement.querySelectorAll('.like-button').forEach(btn => {
             btn.addEventListener('click', handleLikeClick);
         });
     }
@@ -249,9 +300,10 @@
             `;
         }
         container.innerHTML = html;
+        if (featuredSection) featuredSection.style.display = 'none';
     }
 
-    /* ========== MODAL DE PRODUTO (COMPACTO) ========== */
+    /* ========== MODAL DE PRODUTO ========== */
     function getProductDescription(product) {
         if (product.description && product.description.trim() !== '') {
             return product.description;
@@ -289,7 +341,6 @@
         const isAvailable = product.is_available !== undefined ? product.is_available : (stockQty > 0);
         const description = getProductDescription(product);
 
-        // Layout mais compacto
         modalBody.innerHTML = `
             <div class="modal-image">
                 <img src="${product.image_url}" alt="${product.name}" id="modalProductImage" loading="lazy">
@@ -453,14 +504,11 @@
         const newCount = isNowLiked ? (previousCount || likesMap[productId] || 0) + 1 : Math.max(0, (likesMap[productId] || 1) - 1);
         likesMap[productId] = newCount;
 
-        // Vibração (mobile)
         if (navigator.vibrate) navigator.vibrate(20);
 
-        // Atualizar contador no modal
         const modalCount = document.getElementById('modalLikeCount');
         if (modalCount) modalCount.textContent = newCount;
 
-        // Atualizar botão no modal
         const modalBtn = document.getElementById('modalLikeBtn');
         if (modalBtn) {
             const iconSpan = modalBtn.querySelector('.like-icon');
@@ -470,7 +518,6 @@
             modalBtn.setAttribute('aria-pressed', isNowLiked);
         }
 
-        // Atualizar card correspondente
         const cardBtn = document.querySelector(`.like-button[data-product-id="${productId}"]`);
         if (cardBtn) {
             cardBtn.querySelector('.like-icon').textContent = isNowLiked ? '❤️' : '🤍';
@@ -479,7 +526,6 @@
             const countSpan = document.getElementById(`like-count-${productId}`);
             if (countSpan) {
                 countSpan.textContent = newCount;
-                // Animação pop
                 countSpan.classList.remove('like-pop');
                 void countSpan.offsetWidth;
                 countSpan.classList.add('like-pop');
@@ -554,10 +600,11 @@
                 image_url: 'https://cdn.dooca.store/149217/products/bz2bncigezjd3ucfkgnwkgtwfni7kqxtcvap_640x640+fill_ffffff.jpg',
                 stock_quantity: 10,
                 is_available: true,
-                stone: null
+                stone: null,
+                featured: true   // já nasce como destaque
             };
             await supabase.from('products').insert([initialProduct]);
-            console.log('✅ Produto inicial inserido');
+            console.log('✅ Produto inicial inserido (destaque)');
         } catch (err) {
             console.warn('⚠️ Seed automático falhou:', err.message);
         }
@@ -567,9 +614,7 @@
         if (!supabase) return;
         try {
             await supabase.from('page_views').insert([{ page: 'catalogo' }]);
-        } catch (err) {
-            // Silencioso
-        }
+        } catch (err) {}
     }
 
     async function fetchAndDisplayTotalViews() {
@@ -871,12 +916,7 @@
         if (!nav) return;
         
         const items = nav.querySelectorAll('.bottom-nav__item');
-        const sections = {
-            home: document.querySelector('.promo-carousel'),
-            catalog: document.getElementById('productContainer'),
-            contact: null
-        };
-
+        
         items.forEach(item => {
             item.addEventListener('click', () => {
                 items.forEach(i => i.classList.remove('active'));
@@ -1004,7 +1044,7 @@
     }
 
     function initTouchOptimizations() {
-        document.querySelectorAll('button, a, .product-card').forEach(el => {
+        document.querySelectorAll('button, a, .product-card, .featured-card').forEach(el => {
             el.addEventListener('touchstart', function() {
                 this.classList.add('touch-active');
             }, { passive: true });
