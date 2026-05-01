@@ -1573,6 +1573,26 @@ body {
         width: 100%;
     }
 
+    /* MODAL CENTRALIZADO EM VEZ DE BOTTOM SHEET */
+    .modal {
+        align-items: center;
+        justify-content: center;
+        padding: 16px;               /* espaço seguro */
+    }
+
+    .modal-content {
+        border-radius: var(--radius-lg);   /* cantos arredondados completos */
+        max-height: 85vh;
+        max-width: 100% !important;
+        width: 100%;
+        animation: modal-in 0.35s cubic-bezier(0.4, 0, 0.2, 1); /* animação de escala (padrão) */
+    }
+
+    /* Remove o “puxador” de bottom sheet */
+    .modal-content::before {
+        display: none;
+    }
+
     .modal-content--product,
     .modal-content--artist {
         max-width: 95vw;
@@ -1652,6 +1672,11 @@ body {
 
     .featured-card {
         width: 160px;
+    }
+
+    .carousel-pause-btn {
+        bottom: 10px;
+        right: 8px;
     }
 }
 
@@ -1806,70 +1831,7 @@ input, textarea {
     to { transform: rotate(360deg); }
 }
 
-/* Modal bottom sheet */
-@media (max-width: 768px) {
-    .modal {
-        align-items: flex-end;
-        padding: 0;
-    }
-
-    .modal-content {
-        border-radius: 20px 20px 0 0;
-        max-height: 85vh;
-        max-width: 100% !important;
-        width: 100%;
-        animation: modal-up 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-        margin: 0;
-    }
-
-    @keyframes modal-up {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
-
-    .modal-overlay {
-        background: rgba(0, 0, 0, 0.7);
-    }
-
-    .modal-close {
-        top: 12px;
-        right: 12px;
-    }
-
-    .modal-content::before {
-        content: '';
-        display: block;
-        width: 36px;
-        height: 4px;
-        background: #444;
-        border-radius: 4px;
-        margin: 10px auto 0;
-        opacity: 0.6;
-    }
-
-    .carousel-pause-btn {
-        bottom: 10px;
-        right: 8px;
-    }
-}
-
-.modal-content.swiping {
-    transition: transform 0.2s ease-out;
-}
-
-/* Aumentar toque */
-.like-button,
-.filter-btn,
-.promo-banner__cta,
-.promo-banner__desc-btn,
-.modal-whatsapp-btn,
-.modal-like-btn {
-    min-height: 44px;
-    min-width: 44px;
-    padding: 12px 20px;
-}
-
-/* Ajuste radio */
+/* Ajuste radio para não sobrepor a Bottom Nav */
 .radio-player {
     bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     right: 12px;

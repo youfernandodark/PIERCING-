@@ -1004,44 +1004,8 @@
         });
     }
 
-    function initSwipeToDismissModal() {
-        const modalContent = document.querySelector('.modal-content--product');
-        if (!modalContent) return;
-
-        let touchStartY = 0;
-        let currentTranslate = 0;
-        let isDragging = false;
-
-        modalContent.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-            isDragging = true;
-            modalContent.style.transition = 'none';
-        }, { passive: true });
-
-        modalContent.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const delta = e.touches[0].clientY - touchStartY;
-            if (delta > 0) {
-                currentTranslate = delta;
-                modalContent.style.transform = `translateY(${delta}px)`;
-                modalContent.classList.add('swiping');
-            }
-        }, { passive: true });
-
-        modalContent.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            modalContent.style.transition = 'transform 0.25s ease-out';
-
-            if (currentTranslate > 120) {
-                closeModal();
-            }
-            
-            modalContent.style.transform = '';
-            modalContent.classList.remove('swiping');
-            currentTranslate = 0;
-        });
-    }
+    // Comentada – swipe-to-dismiss removido, pois o modal agora é centralizado.
+    // function initSwipeToDismissModal() { ... }
 
     function initTouchOptimizations() {
         document.querySelectorAll('button, a, .product-card, .featured-card').forEach(el => {
@@ -1067,7 +1031,7 @@
         
         initBottomNav();
         initPullToRefresh();
-        initSwipeToDismissModal();
+        // initSwipeToDismissModal(); // Removido – modal centralizado não precisa de swipe para fechar
         initTouchOptimizations();
     });
 })();
