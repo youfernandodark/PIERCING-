@@ -27,6 +27,8 @@
     --accent-green: #4caf84;
     --accent-red: #e07070;
     --accent-purple: #b890c0;
+    --accent-pink: #ff8fad;
+    --accent-rose: #ff4d74;
     --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --radius-sm: 8px;
     --radius-md: 14px;
@@ -370,6 +372,125 @@ body {
     color: #e8c8e8;
 }
 
+/* ===== MODAL DIA DOS NAMORADOS ===== */
+.valentine-modal {
+    z-index: 1600;
+}
+
+.modal-content--valentine {
+    max-width: 480px;
+    width: 100%;
+    background: linear-gradient(160deg, #1f0e1e 0%, #2e1a2c 100%);
+    border: 1px solid rgba(255, 120, 160, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 90, 140, 0.1) inset;
+}
+
+.valentine-modal-body {
+    text-align: center;
+    padding: 32px 24px 28px;
+}
+
+.valentine-modal__icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    animation: valentine-pulse 1.8s infinite ease;
+    display: inline-block;
+}
+
+@keyframes valentine-pulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 0 #ff3366); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 8px #ff6a93); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 0 #ff3366); }
+}
+
+.valentine-modal__title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #FFCCDD, #FF8DAD);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.3px;
+}
+
+.valentine-modal__highlight {
+    background: linear-gradient(110deg, rgba(255, 61, 108, 0.15), rgba(182, 43, 79, 0.15));
+    border-left: 4px solid #ff6289;
+    padding: 14px 18px;
+    border-radius: 20px;
+    margin: 16px 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.valentine-modal__price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #FFB3C6;
+}
+
+.valentine-modal__gift {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #FF8DAD;
+    background: rgba(255, 45, 95, 0.2);
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 119, 155, 0.4);
+}
+
+.valentine-modal__details {
+    text-align: left;
+    margin: 0 0 16px;
+    padding: 0 10px;
+}
+
+.valentine-modal__details p {
+    padding: 6px 0;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.valentine-modal__note {
+    font-size: 0.78rem;
+    color: #dcb0c0;
+    font-style: italic;
+    margin: 12px 0 20px;
+    padding: 0 10px;
+}
+
+.valentine-modal__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(95deg, #ff4d74, #d92b55);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: var(--radius-full);
+    border: none;
+    box-shadow: 0 8px 20px rgba(158, 42, 75, 0.5);
+    transition: all var(--transition-fast);
+    width: 100%;
+    font-family: var(--font-main);
+}
+
+.valentine-modal__cta:hover {
+    background: linear-gradient(95deg, #ff2f60, #c41f4a);
+    transform: scale(0.98);
+    box-shadow: 0 4px 12px rgba(99, 31, 56, 0.6);
+}
+
 /* ===== MARQUEE ===== */
 .top-marquee {
     background: #0e0e0e;
@@ -461,6 +582,21 @@ body {
     margin-bottom: 10px;
 }
 
+.promo-banner--valentine .promo-banner__badge { 
+    background: #2e1a2c; 
+    color: #ffb7c5; 
+    border-color: #5a2a4a; 
+}
+
+.promo-banner--valentine {
+    background: linear-gradient(150deg, #2a1a28 0%, #1a0e18 100%);
+    border-color: rgba(255, 100, 140, 0.3);
+}
+
+.promo-banner--valentine:hover {
+    border-color: rgba(255, 100, 140, 0.55);
+}
+
 .promo-banner--mother .promo-banner__badge { background: #2e1e2e; color: #e0b8e0; border-color: #5a3a5a; }
 .promo-banner--pierce .promo-banner__badge { background: #1e2e2e; color: #a0e0d0; border-color: #3a5a5a; }
 .promo-banner--progress .promo-banner__badge { background: #1e2a1e; color: #a0e0a0; border-color: #3a5a3a; }
@@ -482,6 +618,13 @@ body {
     color: transparent;
 }
 
+.promo-banner--valentine .promo-banner__title span {
+    background: linear-gradient(135deg, #ffb7c5, #ff6a93);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 .promo-banner__subtitle {
     color: var(--text-secondary);
     font-size: 0.95rem;
@@ -495,6 +638,10 @@ body {
     border-left: 2px solid #6a4a6a;
     padding-left: 12px;
     margin-top: 10px;
+}
+
+.promo-banner--valentine .promo-banner__note {
+    border-left-color: #8a4a6a;
 }
 
 .promo-banner__cta {
@@ -952,12 +1099,12 @@ body {
     -webkit-overflow-scrolling: touch;
     gap: 14px;
     padding: 8px 0 12px;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .featured-carousel::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
 }
 
 .featured-card {
@@ -1573,22 +1720,20 @@ body {
         width: 100%;
     }
 
-    /* MODAL CENTRALIZADO EM VEZ DE BOTTOM SHEET */
     .modal {
         align-items: center;
         justify-content: center;
-        padding: 16px;               /* espaço seguro */
+        padding: 16px;
     }
 
     .modal-content {
-        border-radius: var(--radius-lg);   /* cantos arredondados completos */
+        border-radius: var(--radius-lg);
         max-height: 85vh;
         max-width: 100% !important;
         width: 100%;
-        animation: modal-in 0.35s cubic-bezier(0.4, 0, 0.2, 1); /* animação de escala (padrão) */
+        animation: modal-in 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Remove o “puxador” de bottom sheet */
     .modal-content::before {
         display: none;
     }
@@ -1677,6 +1822,14 @@ body {
     .carousel-pause-btn {
         bottom: 10px;
         right: 8px;
+    }
+
+    .valentine-modal__title {
+        font-size: 1.4rem;
+    }
+
+    .valentine-modal__price {
+        font-size: 1.2rem;
     }
 }
 

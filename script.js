@@ -461,6 +461,47 @@
         document.body.style.overflow = '';
     }
 
+    /* ========== MODAL DE DIA DOS NAMORADOS ========== */
+    function initValentineModal() {
+        const valentineModal = document.getElementById('valentineModal');
+        const openValentineBtn = document.getElementById('openValentineModal');
+        const closeValentineBtn = document.querySelector('.valentine-modal-close');
+        const valentineOverlay = valentineModal ? valentineModal.querySelector('.modal-overlay') : null;
+
+        function openValentineModal() {
+            if (!valentineModal) return;
+            valentineModal.classList.add('active');
+            valentineModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeValentineModal() {
+            if (!valentineModal) return;
+            valentineModal.classList.remove('active');
+            valentineModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (openValentineBtn) {
+            openValentineBtn.addEventListener('click', openValentineModal);
+        }
+
+        if (closeValentineBtn) {
+            closeValentineBtn.addEventListener('click', closeValentineModal);
+        }
+
+        if (valentineOverlay) {
+            valentineOverlay.addEventListener('click', closeValentineModal);
+        }
+
+        // Fechar com tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && valentineModal && valentineModal.classList.contains('active')) {
+                closeValentineModal();
+            }
+        });
+    }
+
     /* ========== SISTEMA DE LIKES ========== */
     async function toggleLike(productId) {
         if (!supabase) {
@@ -601,7 +642,7 @@
                 stock_quantity: 10,
                 is_available: true,
                 stone: null,
-                featured: true   // já nasce como destaque
+                featured: true
             };
             await supabase.from('products').insert([initialProduct]);
             console.log('✅ Produto inicial inserido (destaque)');
@@ -726,6 +767,7 @@
         });
     }
 
+    /* ========== CARROSSEL DE PROMOÇÕES ========== */
     function initPromoCarousel() {
         const slidesContainer = document.querySelector('.promo-slides');
         const slides = document.querySelectorAll('.promo-slide');
@@ -765,6 +807,10 @@
         };
 
         startAutoPlay();
+
+        // Expor funções para o modal de Dia dos Namorados
+        window.stopCarousel = pauseAutoPlay;
+        window.startCarousel = resumeAutoPlay;
 
         pauseBtn.addEventListener('click', () => {
             isPaused ? resumeAutoPlay() : pauseAutoPlay();
@@ -812,6 +858,7 @@
         });
     }
 
+    /* ========== RÁDIO PLAYER ========== */
     function initRadioPlayer() {
         const audio = document.getElementById('radioAudio');
         const playBtn = document.getElementById('radioPlayBtn');
@@ -881,6 +928,7 @@
         });
     }
 
+    /* ========== DADOS ESTRUTURADOS (SEO) ========== */
     function generateStructuredData() {
         if (!allProducts.length) return;
         const items = allProducts.slice(0, 20).map(prod => ({
@@ -1004,9 +1052,6 @@
         });
     }
 
-    // Comentada – swipe-to-dismiss removido, pois o modal agora é centralizado.
-    // function initSwipeToDismissModal() { ... }
-
     function initTouchOptimizations() {
         document.querySelectorAll('button, a, .product-card, .featured-card').forEach(el => {
             el.addEventListener('touchstart', function() {
@@ -1027,11 +1072,11 @@
         initPromoCarousel();
         initRadioPlayer();
         initArtistModal();
+        initValentineModal();        // ← NOVO: Modal do Dia dos Namorados
         generateStructuredData();
         
         initBottomNav();
         initPullToRefresh();
-        // initSwipeToDismissModal(); // Removido – modal centralizado não precisa de swipe para fechar
         initTouchOptimizations();
     });
 })();

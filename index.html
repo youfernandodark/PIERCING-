@@ -69,6 +69,32 @@
         </div>
     </div>
 
+    <!-- Modal de Promoção Dia dos Namorados -->
+    <div id="valentineModal" class="modal valentine-modal" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-content--valentine" role="dialog" aria-modal="true" aria-labelledby="valentineModalTitle">
+            <button class="modal-close valentine-modal-close" aria-label="Fechar modal">&times;</button>
+            <div class="modal-body valentine-modal-body">
+                <div class="valentine-modal__icon">💘</div>
+                <h2 id="valentineModalTitle" class="valentine-modal__title">Promoção Dia dos Namorados</h2>
+                <div class="valentine-modal__highlight">
+                    <span class="valentine-modal__price">Tattoo acima de R$150</span>
+                    <span class="valentine-modal__gift">+ Delicada Grátis</span>
+                </div>
+                <div class="valentine-modal__details">
+                    <p>✨ Estamos esperando você mandar sua arte</p>
+                    <p>🎁 Para ganhar o brinde, terá que pagar 50% do valor na hora de agendar.</p>
+                    <p>💑 Válido para casais ou para presentear quem ama</p>
+                    <p>📅 Agende até 12/06 e garanta sua delicada</p>
+                </div>
+                <p class="valentine-modal__note">A delicada será escolhida em parceria com seu artista. Condições exclusivas.</p>
+                <a href="https://wa.me/message/FLSHGYBYY47GE1" class="valentine-modal__cta" target="_blank" rel="noopener noreferrer">
+                    💖 Quero Minha Delicada
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Marquee -->
     <div class="top-marquee">
         <div class="marquee-track">
@@ -81,7 +107,7 @@
         <!-- Carrossel de Banners -->
         <section class="promo-carousel" aria-roledescription="carousel" aria-label="Promoções e destaques">
             <div class="promo-slides" aria-live="polite">
-                <!-- Slide 0 -->
+                <!-- Slide 0 - Promoção de Inverno -->
                 <div class="promo-slide">
                     <div class="promo-banner promo-banner--fire">
                         <div class="promo-banner__content">
@@ -102,26 +128,34 @@
                         </div>
                     </div>
                 </div>
-                <!-- Slide 1 -->
+                
+                <!-- Slide 1 - Dia dos Namorados -->
                 <div class="promo-slide">
-                    <div class="promo-banner promo-banner--mother">
+                    <div class="promo-banner promo-banner--valentine">
                         <div class="promo-banner__content">
                             <div class="promo-banner__text">
-                                <span class="promo-banner__badge">📆 agende sua tattoo </span>
-                                <h2 class="promo-banner__title">Em breve nova promoção <span>😉 </span></h2>
-                                <p class="promo-banner__subtitle"><strong>agende sua tattoo e ganhe descontos </strong></p>
-                                <p class="promo-banner__note"></p>
-                                <p class="promo-banner__note"></p>
+                                <span class="promo-banner__badge">💘 Dia dos Namorados</span>
+                                <h2 class="promo-banner__title">Tattoo acima de R$150 + <span>Delicada Grátis</span></h2>
+                                <p class="promo-banner__subtitle">Escolha sua arte e ganhe uma tatuagem delicada exclusiva</p>
+                                <p class="promo-banner__subtitle">Válido para casais ou para presentear quem você ama 💕</p>
+                                <p class="promo-banner__note">Agende até 12/06 e garanta sua delicada</p>
+                                <div class="promo-banner__actions">
+                                    <a href="https://wa.me/message/FLSHGYBYY47GE1" class="promo-banner__cta" target="_blank" rel="noopener noreferrer">
+                                        💖 Quero Minha Delicada
+                                    </a>
+                                    <button class="promo-banner__desc-btn" id="openValentineModal">🎁 Saiba Mais</button>
+                                </div>
                             </div>
                             <div class="promo-banner__visual" aria-hidden="true">
+                                <span class="promo-banner__emoji">💘</span>
                                 <span class="promo-banner__emoji">🎁</span>
                                 <span class="promo-banner__emoji">💝</span>
-                                <span class="promo-banner__emoji">🌸</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Slide 2 -->
+                
+                <!-- Slide 2 - Promoção de Perfuração -->
                 <div class="promo-slide">
                     <div class="promo-banner promo-banner--pierce">
                         <div class="promo-banner__content">
@@ -140,7 +174,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Slide 3 -->
+                
+                <!-- Slide 3 - Combo Progressivo -->
                 <div class="promo-slide">
                     <div class="promo-banner promo-banner--progress">
                         <div class="promo-banner__content">
@@ -160,6 +195,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <!-- Slide 4 - Fernando -->
                 <div class="promo-slide">
                     <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/v6hzMpNV/IMG-20250817-171554-861.jpg');">
@@ -178,6 +214,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <!-- Slide 5 - Thalia -->
                 <div class="promo-slide">
                     <div class="promo-banner promo-banner--artist" style="background-image: url('https://i.ibb.co/wF5kfM6M/IMG-20260426-WA0000.jpg');">
